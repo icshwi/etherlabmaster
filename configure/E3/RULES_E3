@@ -1,0 +1,73 @@
+.DEFAULT_GOAL := help
+
+.PHONY: help default install uninstall build rebuild clean conf
+
+# # help is defined in 
+# # https://gist.github.com/rcmachado/af3db315e31383502660
+help:
+	$(info --------------------------------------- )	
+	$(info Available targets)
+	$(info --------------------------------------- )
+	$(QUIET) awk '/^[a-zA-Z\-\_0-9]+:/ {            \
+	  nb = sub( /^## /, "", helpMsg );              \
+	  if(nb == 0) {                                 \
+	    helpMsg = $$0;                              \
+	    nb = sub( /^[^:]*:.* ## /, "", helpMsg );   \
+	  }                                             \
+	  if (nb)                                       \
+	    print  $$1 "\t" helpMsg;                    \
+	}                                               \
+	{ helpMsg = $$0 }'                              \
+	$(MAKEFILE_LIST) | column -ts:	
+
+
+default: help
+
+## Install : $(E3_MODULE_NAME)
+install: install_module install_links
+
+#install_module: uninstall 
+install_module: uninstall db
+	$(QUIET) $(SUDOBASH) '$(E3_MODULE_MAKE_CMDS) install'
+
+## Uninstall : $(E3_MODULE_NAME)
+uninstall: conf
+	$(QUIET) $(SUDOBASH) '$(E3_MODULE_MAKE_CMDS) uninstall'
+	$(SUDO) find $(E3_SITELIBS_PATH) -xtype l -delete 
+
+## Build the EPICS Module : $(E3_MODULE_NAME)
+# Build always the Module with the EPICS_MODULES_TAG
+build: conf checkout vlibs
+	$(QUIET) $(E3_MODULE_MAKE_CMDS) build
+
+
+## Clean, build, and install the EPICS Module : $(E3_MODULE_NAME)
+rebuild: clean build install
+
+
+## Clean : $(E3_MODULE_NAME)
+clean: conf
+	$(QUIET) $(E3_MODULE_MAKE_CMDS) clean
+
+
+## Copy $(E3_MODULE_MAKEFILE) into $(E3_MODULE_SRC_PATH)
+conf: 
+	$(QUIET) install -m 644 $(TOP)/$(E3_MODULE_MAKEFILE)  $(E3_MODULE_SRC_PATH)/
+
+
+.PHONY: init git-submodule-sync $(E3_MODULE_SRC_PATH)  checkout
+
+## Initialize : $(E3_MODULE_SRC_PATH) 
+init: git-submodule-sync $(E3_MODULE_SRC_PATH)  checkout
+
+git-submodule-sync:
+	$(QUIET) git submodule sync
+
+
+$(E3_MODULE_SRC_PATH): 
+	$(QUIET) $(git_update)
+
+checkout: 
+	cd $(E3_MODULE_SRC_PATH) && git checkout $(EPICS_MODULE_TAG)
+
+

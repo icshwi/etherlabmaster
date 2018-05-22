@@ -1,0 +1,22 @@
+# Variables should be transferred to module_name.makefile
+
+EPICS_HOST_ARCH:=$(shell $(EPICS_BASE)/startup/EpicsHostArch.pl)
+
+EXPORT_VARS+=SUDO
+EXPORT_VARS+=EPICS_HOST_ARCH
+EXPORT_VARS+=EPICS_BASE
+EXPORT_VARS+=E3_REQUIRE_TOOLS
+EXPORT_VARS+=E3_MODULE_VERSION
+EXPORT_VARS+=E3_SITEMODS_PATH
+EXPORT_VARS+=E3_SITEAPPS_PATH
+EXPORT_VARS+=E3_SITELIBS_PATH
+EXPORT_VARS+=E3_SEQUENCER_NAME
+EXPORT_VARS+=E3_SEQUENCER_VERSION
+
+
+EXPORT_VARS+=$(filter %_DEP_VERSION,$(.VARIABLES))
+export_version=$(eval export $1)
+$(eval $(foreach v,$(EXPORT_VARS),$(call export_version,$v)))
+
+VARS_EXCLUDES+=export_version
+

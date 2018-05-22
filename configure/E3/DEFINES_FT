@@ -1,0 +1,47 @@
+# Keep always the module up-to-date
+define git_module_init_update =
+git submodule deinit -f $@/
+sed -i '/submodule/,24465d'  $(TOP)/.git/config
+rm -rf $(TOP)/.git/modules/$@
+git submodule init $@/
+git submodule update --init --recursive $@/.
+git submodule update --remote --merge $@/
+endef
+
+define git_update =
+git submodule update --init --recursive $@/.
+git submodule update --remote --merge $@/
+endef
+
+define patch_site
+for i in $(wildcard $(TOP)/patch/Site/*p0.patch); do\
+	printf "\nPatching %s with the file : %s\n" "$(E3_MODULE_SRC_PATH)" "$$i";\
+	patch -d $(E3_MODULE_SRC_PATH) --ignore-whitespace -p0 < $$i;\
+done
+endef
+
+
+define patch_revert_site
+for i in $(wildcard $(TOP)/patch/Site/*p0.patch); do\
+	printf "\nPatching %s with the file : %s\n" "$(E3_MODULE_SRC_PATH)" "$$i";\
+	patch -R -d $(E3_MODULE_SRC_PATH) --ignore-whitespace -p0 < $$i;\
+done
+endef
+
+
+ifndef VERBOSE
+  QUIET := @
+endif
+
+ifdef DEBUG_SHELL
+  SHELL = /bin/sh -x
+endif
+
+
+### Exclude the following variables to display 
+VARS_EXCLUDES+=git_update
+VARS_EXCLUDES+=git_module_init_update
+VARS_EXCLUDES+=patch_site
+VARS_EXCLUDES+=patch_revert_site
+VARS_EXCLUDES+=QUIET
+VARS_EXCLUDES+=SHELL

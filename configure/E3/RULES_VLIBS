@@ -1,0 +1,6 @@
+
+.PHONY: vlibs
+
+vlibs: conf
+	$(QUIET) $(E3_MODULE_MAKE_CMDS) vlibs
+

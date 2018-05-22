@@ -1,0 +1,8 @@
+EPICS_BASE=/epics/base-3.15.5
+
+E3_REQUIRE_NAME:=require
+E3_REQUIRE_VERSION:=3.0.0
+
+# The definitions shown below can also be placed in an untracked RELEASE_DEV.local
+-include $(TOP)/../RELEASE_DEV.local
+-include $(TOP)/configure/RELEASE_DEV.local

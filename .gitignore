@@ -1,0 +1,14 @@
+*~  
+*-dev
+modules.order
+Module.symvers
+Mkfile.old
+dkms.conf
+core.*
+#*
+.#*
+\#*
+*.local
+\#*
+.cvsignore
+*_old/

@@ -1,0 +1,30 @@
+VARS_EXCLUDES := $(.VARIABLES)
+
+ifneq (,$(findstring dev,$(MAKECMDGOALS)))
+include $(TOP)/configure/RELEASE_DEV
+else
+include $(TOP)/configure/RELEASE
+endif
+
+# CONFIG=$(EPICS_BASE)/configure
+# include $(CONFIG)/CONFIG
+
+ifneq (,$(findstring dev,$(MAKECMDGOALS)))
+include $(TOP)/configure/CONFIG_MODULE_DEV
+else
+include $(TOP)/configure/CONFIG_MODULE
+endif
+
+## Asyn, ADSupport may needs to define other variables
+
+-include $(TOP)/configure/CONFIG_OPTIONS
+
+## It is not necessary to modify the following files in most case.
+## Order is matter
+
+include $(TOP)/configure/E3/CONFIG_REQUIRE
+include $(TOP)/configure/E3/CONFIG_E3_PATH
+include $(TOP)/configure/E3/CONFIG_E3_MAKEFILE
+include $(TOP)/configure/E3/CONFIG_EPICS
+include $(TOP)/configure/E3/CONFIG_SUDO
+include $(TOP)/configure/E3/CONFIG_EXPORT

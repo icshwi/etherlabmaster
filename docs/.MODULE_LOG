@@ -1,0 +1,14 @@
+>>
+Script is used     : create_e3_modules.bash
+Script Path        : /home/jhlee/e3/tools/template_gen
+User               : jhlee
+Log Time           : 2018May22-1613-30CEST
+e3 repo Hash       : 31f0fe0
+>> 
+EPICS_MODULE_NAME  :                                                   etherlabmaster
+E3_MODULE_SRC_PATH :                                              etherlabmaster-code
+E3_TARGET_URL      :                                        https://github.com/icshwi
+>> 
+e3 module name     :                                                e3-etherlabmaster
+e3 target url full :                      https://github.com/icshwi/e3-etherlabmaster
+>> 

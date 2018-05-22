@@ -1,0 +1,19 @@
+
+E3_MODULES_VARIABLES:=$(sort $(filter-out $(VARS_EXCLUDES) VARS_EXCLUDES,$(.VARIABLES)))
+
+.PHONY : env vars header
+
+## Print interesting VARIABLES
+env: vars
+
+vars: header
+	$(foreach v, $(E3_MODULES_VARIABLES), $(info $(v) = $($(v)))) @#noop
+
+header:
+	$(QUIET)echo ""
+	$(QUIET)echo "------------------------------------------------------------"
+	$(QUIET)echo ">>>>     Current EPICS and E3 Envrionment Variables     <<<<"
+	$(QUIET)echo "------------------------------------------------------------"
+	$(QUIET)echo ""
+
+
