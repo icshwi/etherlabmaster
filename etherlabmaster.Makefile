@@ -29,7 +29,8 @@
 autoconf:
 	touch ChangeLog
 	autoreconf --force --install -v
-	./configure --disable-8139too --prefix=$(E3_MODULES_VENDOR_LIBS_LOCATION)
+#	./configure --disable-8139too --prefix=$(E3_MODULES_VENDOR_LIBS_LOCATION)
+	./configure --disable-8139too
 
 
 build: 
@@ -58,54 +59,4 @@ clean:
 
 
 .PHONY: autoconf build install uninstall modules modules_install clean
-
-
-## This RULE should be used in case of inflating DB files 
-## db rule is the default in RULES_DB, so add the empty one
-## Please look at e3-mrfioc2 for example.
-
-# db: 
-
-# .PHONY: db 
-
-# EPICS_BASE_HOST_BIN = $(EPICS_BASE)/bin/$(EPICS_HOST_ARCH)
-# MSI = $(EPICS_BASE_HOST_BIN)/msi
-#
-# USR_DBFLAGS += -I . -I ..
-# USR_DBFLAGS += -I $(EPICS_BASE)/db
-# USR_DBFLAGS += -I $(APPDB)
-#
-# SUBS=$(wildcard $(APPDB)/*.substitutions)
-# TMPS=$(wildcard $(APPDB)/*.template)
-#
-# db: $(SUBS) $(TMPS)
-
-# $(SUBS):
-#	@printf "Inflating database ... %44s >>> %40s \n" "$@" "$(basename $(@)).db"
-#	@rm -f  $(basename $(@)).db.d  $(basename $(@)).db
-#	@$(MSI) -D $(USR_DBFLAGS) -o $(basename $(@)).db -S $@  > $(basename $(@)).db.d
-#	@$(MSI)    $(USR_DBFLAGS) -o $(basename $(@)).db -S $@
-
-# $(TMPS):
-#	@printf "Inflating database ... %44s >>> %40s \n" "$@" "$(basename $(@)).db"
-#	@rm -f  $(basename $(@)).db.d  $(basename $(@)).db
-#	@$(MSI) -D $(USR_DBFLAGS) -o $(basename $(@)).db $@  > $(basename $(@)).db.d
-#	@$(MSI)    $(USR_DBFLAGS) -o $(basename $(@)).db $@
-
-#
-# .PHONY: db $(SUBS) $(TMPS)
-
-vlibs:
-
-.PHONY: vlibs
-
-# vlibs: $(VENDOR_LIBS)
-
-# $(VENDOR_LIBS):
-# 	$(QUIET) $(SUDO) install -m 555 -d $(E3_MODULES_VENDOR_LIBS_LOCATION)/
-# 	$(QUIET) $(SUDO) install -m 555 $@ $(E3_MODULES_VENDOR_LIBS_LOCATION)/
-
-# .PHONY: $(VENDOR_LIBS) vlibs
-
-
 

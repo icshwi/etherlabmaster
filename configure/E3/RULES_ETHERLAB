@@ -30,11 +30,10 @@ install: uninstall
 ## Uninstall : $(E3_MODULE_NAME)
 uninstall: conf
 	$(QUIET) $(SUDOBASH) '$(E3_MODULE_MAKE_CMDS) uninstall'
-	$(SUDO) find $(E3_SITELIBS_PATH) -xtype l -delete 
 
 ## Build the EPICS Module : $(E3_MODULE_NAME)
 # Build always the Module with the EPICS_MODULES_TAG
-build: autoconf patch
+build: autoconf
 	$(QUIET) $(E3_MODULE_MAKE_CMDS) build
 
 
@@ -70,9 +69,11 @@ conf:
 
 .PHONY: setup
 
+#setup:
+#	$(QUIET) bash $(TOP)/scripts/etherlab_setup.bash -t $(E3_MODULES_VENDOR_LIBS_LOCATION)
+
 setup:
-	$(QUIET) bash $(TOP)/scripts/etherlab_setup.bash -t $(E3_MODULES_VENDOR_LIBS_LOCATION)
-	
+	$(QUIET) bash $(TOP)/scripts/etherlab_setup.bash -t "/opt/etherlab"
 
 .PHONY: init $(E3_MODULE_SRC_PATH)
 

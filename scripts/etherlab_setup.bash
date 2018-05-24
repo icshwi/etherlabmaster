@@ -17,8 +17,8 @@
 #
 # Author  : Jeong Han Lee
 # email   : jeonghan.lee@gmail.com
-# Date    : Thursday, May 24 10:55:43 CEST 2018
-# version : 0.0.1
+# Date    : Thursday, May 24 16:53:01 CEST 2018
+# version : 0.0.2
 
 declare -gr SC_SCRIPT="$(realpath "$0")"
 declare -gr SC_SCRIPTNAME=${0##*/}
@@ -246,7 +246,7 @@ put_udev_rule "${ECAT_KMOD_NAME}"
 trigger_udev_rule
 
 
-${SUDO_CMD} ln -sf ${ETHERLAB_TARGET_PATH}/bin/ethercat  /usr/local/bin/ethercat
+${SUDO_CMD} ln -sf ${ETHERLAB_TARGET_PATH}/bin/ethercat  /usr/bin/ethercat
 
 printf_tee "${ETHERLAB_TARGET_PATH}/lib" "/etc/ld.so.conf.d/e3_ethercat.conf";
 printf "\n";
