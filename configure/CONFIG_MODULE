@@ -1,27 +1,21 @@
 #
 EPICS_MODULE_NAME:=etherlabmaster
 
-EPICS_MODULE_TAG:=master
+# We are using the following master revision number as the starting point
+#  [9e65f7] (stable-1.5, tip) by Florian Pose
+# Fixed scheduler settings in dc_user example; use CLOCK_MONOTONIC.
+#	2018-02-13 16:16:01 
+EPICS_MODULE_TAG:=9e65f7
 #
-E3_MODULE_VERSION:=master
+# We set this version as 1.5.0 as ESS
 
-# DEPENDENT MODULE VERSION
-# Example, 
-#ASYN_DEP_VERSION:=4.33.0
-#SEQ_DEP_VERSION:=2.1.21
-#PCRE_DEP_VERSION:=8.41.
-#ADCORE_DEP_VERSION:=3.2.0
-#ADSUPPORT_DEP_VERSION:=1.4.0
-#
-# ONLY IF this module has the sequencer dependency. However,
-# in most case, we don't need to enable the following line,
-# the default - latest version will be used
-#E3_SEQUENCER_NAME:=sequencer
-#E3_SEQUENCER_VERSION:=2.1.21
-#
+E3_MODULE_VERSION:=1.5.0
+
+
 # In most case, we don't need to touch the following variables.
 #
 
+E3_ETHERLAB_BRANCH:=stable-1.5
 E3_MODULE_NAME:=$(EPICS_MODULE_NAME)
 E3_MODULE_SRC_PATH:=etherlabmaster-code
 E3_MODULE_MAKEFILE:=$(EPICS_MODULE_NAME).Makefile

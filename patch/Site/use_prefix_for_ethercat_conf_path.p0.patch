@@ -1,0 +1,12 @@
+diff -r 9e65f782e8a1 script/ethercatctl.in
+--- script/ethercatctl.in	Tue Feb 13 17:16:01 2018 +0100
++++ script/ethercatctl.in	Thu May 24 11:47:23 2018 +0200
+@@ -42,7 +42,7 @@
+ 
+ #------------------------------------------------------------------------------
+ 
+-ETHERCAT_CONFIG=/etc/ethercat.conf
++ETHERCAT_CONFIG=@prefix@/etc/ethercat.conf
+ 
+ if [ ! -r ${ETHERCAT_CONFIG} ]; then
+     echo ${ETHERCAT_CONFIG} not existing;

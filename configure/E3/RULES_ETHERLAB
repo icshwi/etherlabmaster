@@ -1,6 +1,6 @@
 .DEFAULT_GOAL := help
 
-.PHONY: help default install uninstall build rebuild clean conf
+.PHONY: help default install uninstall build rebuild clean distclean modules modules_build modules_install autoconf conf
 
 # # help is defined in 
 # # https://gist.github.com/rcmachado/af3db315e31383502660
@@ -24,10 +24,7 @@ help:
 default: help
 
 ## Install : $(E3_MODULE_NAME)
-install: install_module install_links
-
-#install_module: uninstall 
-install_module: uninstall db
+install: uninstall 
 	$(QUIET) $(SUDOBASH) '$(E3_MODULE_MAKE_CMDS) install'
 
 ## Uninstall : $(E3_MODULE_NAME)
@@ -37,7 +34,7 @@ uninstall: conf
 
 ## Build the EPICS Module : $(E3_MODULE_NAME)
 # Build always the Module with the EPICS_MODULES_TAG
-build: conf checkout vlibs
+build: autoconf
 	$(QUIET) $(E3_MODULE_MAKE_CMDS) build
 
 
@@ -49,25 +46,40 @@ rebuild: clean build install
 clean: conf
 	$(QUIET) $(E3_MODULE_MAKE_CMDS) clean
 
+distclean: clean
+	rm -rf $(E3_MODULE_SRC_PATH)	
 
-## Copy $(E3_MODULE_MAKEFILE) into $(E3_MODULE_SRC_PATH)
+modules: modules_build modules_install
+
+
+modules_build:
+	$(QUIET) $(E3_MODULE_MAKE_CMDS) modules
+
+
+modules_install:
+	$(QUIET) $(SUDOBASH) '$(E3_MODULE_MAKE_CMDS) modules_install'
+
+
+autoconf: conf
+	$(QUIET) $(E3_MODULE_MAKE_CMDS) autoconf
+
+## 
 conf: 
 	$(QUIET) install -m 644 $(TOP)/$(E3_MODULE_MAKEFILE)  $(E3_MODULE_SRC_PATH)/
 
 
-.PHONY: init git-submodule-sync $(E3_MODULE_SRC_PATH)  checkout
+.PHONY: setup
 
-## Initialize : $(E3_MODULE_SRC_PATH) 
-init: git-submodule-sync $(E3_MODULE_SRC_PATH)  checkout
+setup:
+	$(QUIET) bash $(TOP)/scripts/etherlab_setup.bash -t $(E3_MODULES_VENDOR_LIBS_LOCATION)
+	
 
-git-submodule-sync:
-	$(QUIET) git submodule sync
+.PHONY: init $(E3_MODULE_SRC_PATH)
 
+## Initialize : 
+init:
+	hg clone http://hg.code.sf.net/p/etherlabmaster/code $(E3_MODULE_SRC_PATH) -r $(E3_ETHERLAB_BRANCH)
+	cd $(E3_MODULE_SRC_PATH) && hg update -r $(EPICS_MODULE_TAG)
 
-$(E3_MODULE_SRC_PATH): 
-	$(QUIET) $(git_update)
-
-checkout: 
-	cd $(E3_MODULE_SRC_PATH) && git checkout $(EPICS_MODULE_TAG)
-
-
+# init:
+# 	hg clone --rev $(EPICS_MODULE_TAG) http://hg.code.sf.net/p/etherlabmaster/code $(E3_MODULE_SRC_PATH)

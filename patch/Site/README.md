@@ -16,7 +16,9 @@ The changes were tested in local environemnt, and commits to the forked reposito
 
 * Create p0 patch
 
+Mecurial on Debian 8 doesn't support --no-prefix options: 
 ```
-$git diff feb8856 master --no-prefix > ../patch/Site/what_ever_filename.p0.patch
+$hg diff script/ethercatctl.in > ../use_prefix_for_ethercat_conf_path.p0.patch
 ```
+And remove a/b in user_prefix_for_ethercat_conf_path.p0.patch manually.
 
