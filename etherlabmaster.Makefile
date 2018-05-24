@@ -30,7 +30,7 @@ autoconf:
 	touch ChangeLog
 	autoreconf --force --install -v
 #	./configure --disable-8139too --prefix=$(E3_MODULES_VENDOR_LIBS_LOCATION)
-	./configure --disable-8139too
+	./configure --disable-8139too --prefix="/opt/etherlab"
 
 
 build: 

@@ -25,12 +25,21 @@ Please look at scripts/ethercatmaster.conf, and enable one and disable all other
 $ make setup
 ```
 
+One should start the ethercat via
+```
+$ sudo systemctl start ethercat
+```
+And one can check the master status as follows:
+```
+$ ethercat master
+```
+
 
 ## Steps
 
 ### make init
 * Download the main etherlabmaster-code from sf.net
-* Switch to Revison 9e65f7.  We are using the following master revision number as the starting point  
+* Switch to Revison 9e65f7. We are using the following master revision number as the starting point  
 ```
 [9e65f7] (stable-1.5, tip) by Florian Pose 
 Fixed scheduler settings in dc_user example; use CLOCK_MONOTONIC.

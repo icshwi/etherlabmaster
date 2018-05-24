@@ -1,5 +1,6 @@
 #!/bin/bash
 #
+#  Copyright (c) 2018 Jeong Han Lee
 #  Copyright (c) 2018 European Spallation Source ERIC
 #
 #  The program is free software: you can redistribute
@@ -17,8 +18,8 @@
 #
 # Author  : Jeong Han Lee
 # email   : jeonghan.lee@gmail.com
-# Date    : Thursday, May 24 16:53:01 CEST 2018
-# version : 0.0.2
+# Date    : Friday, May 25 00:13:59 CEST 2018
+# version : 0.0.3
 
 declare -gr SC_SCRIPT="$(realpath "$0")"
 declare -gr SC_SCRIPTNAME=${0##*/}
@@ -34,9 +35,10 @@ set +a
 
 ECAT_MASTER_SYSTEMD=ethercat.service
 ECAT_MASTER_CONF=ethercat.conf
-
 SD_UNIT_PATH_DEBIAN=/etc/systemd/system
 SD_UNIT_PATH_CENTOS=/usr/lib/systemd/system
+
+
 
 ECAT_KMOD_NAME="ethercat"
 ECAT_KMOD_MASTER_NAME="master"
@@ -45,10 +47,9 @@ ECAT_KMOD_GENERIC_NAME="generic"
 KMOD_PERMISSON="666"
 
 
-ETHERLAB_PATH=""
 ECAT_SYSTEMD_PATH=""
 ECAT_CONF_PATH=""
-
+ETHERCAT_CONFIG=""
 
 
 function find_dist
@@ -105,6 +106,9 @@ function setup_systemd
     ${SUDO_CMD} systemctl enable ${ECAT_MASTER_SYSTEMD};
     
     mac_address=$(get_macaddr ${ETHERCAT_MASTER0});
+
+    printf ">>> Set up EtherCAT Master ... \n";
+    printf "%s : %s\n" "${ETHERCAT_MASTER0}" "${mac_address}"
     
     m4 -D_MASTER0_DEVICE="${mac_address}" -D_DEVICE_MODULES="${ECAT_KMOD_GENERIC_NAME}" ${SC_TOP}/ethercat.conf.m4 > ${SC_TOP}/ethercat.conf_temp
     
@@ -250,3 +254,5 @@ ${SUDO_CMD} ln -sf ${ETHERLAB_TARGET_PATH}/bin/ethercat  /usr/bin/ethercat
 
 printf_tee "${ETHERLAB_TARGET_PATH}/lib" "/etc/ld.so.conf.d/e3_ethercat.conf";
 printf "\n";
+
+
