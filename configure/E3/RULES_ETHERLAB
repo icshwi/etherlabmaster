@@ -34,7 +34,7 @@ uninstall: conf
 
 ## Build the EPICS Module : $(E3_MODULE_NAME)
 # Build always the Module with the EPICS_MODULES_TAG
-build: autoconf
+build: autoconf patch
 	$(QUIET) $(E3_MODULE_MAKE_CMDS) build
 
 
