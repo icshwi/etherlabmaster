@@ -55,8 +55,9 @@ modules_build:
 	$(QUIET) $(E3_MODULE_MAKE_CMDS) modules
 
 
+# always sudo is needed
 modules_install:
-	$(QUIET) $(SUDOBASH) '$(E3_MODULE_MAKE_CMDS) modules_install'
+	$(QUIET) sudo -E bash -c '$(E3_MODULE_MAKE_CMDS) modules_install'
 
 
 autoconf: conf
@@ -73,7 +74,7 @@ conf:
 #	$(QUIET) bash $(TOP)/scripts/etherlab_setup.bash -t $(E3_MODULES_VENDOR_LIBS_LOCATION)
 
 setup:
-	$(QUIET) bash $(TOP)/scripts/etherlab_setup.bash -t "/opt/etherlab"
+	$(QUIET) bash $(TOP)/scripts/etherlab_setup.bash -t $(E3_ETHERLAB_INSTALL_LOCATION)
 
 .PHONY: init $(E3_MODULE_SRC_PATH)
 
