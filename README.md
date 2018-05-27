@@ -13,28 +13,32 @@ Please execute one by one in order.
 
 
 ```
-$ make init
-$ make patch
-$ make build
-$ make install
-$ make modules_build
-$ make modules_install
+etherlabmaster (master)$ make init
+etherlabmaster (master)$ make patch
+etherlabmaster (master)$ make build
+etherlabmaster (master)$ make install
+etherlabmaster (master)$ make modules_build
+etherlabmaster (master)$ make modules_install
 ```
 
-Before the setup the etherlab master, one should define the network port which one would like to use as the EtherCAT Master.
-Please look at scripts/ethercatmaster.conf, and enable one and disable all others to match the device which one would like to use. Then,
+Before the setup the etherlab master, one should define the network port which one would like to use as the EtherCAT Master. Please look at scripts/ethercatmaster.conf, and enable one and disable all others to match the device which one would like to use. With the local setup, which doesn't change any git status , one can set the master device as follows:
 
 ```
-$ make setup
+etherlabmaster (master)$ echo "ETHERCAT_MASTER0=eth0" > ethercatmaster.local
+```
+The local file will be used to override the ETHERCAT_MASTER0 variable defined in scripts/ethercatmaster.conf. After that, 
+
+```
+etherlabmaster (master)$ make setup
 ```
 
 One should start the ethercat via
 ```
-$ sudo systemctl start ethercat
+etherlabmaster (master)$ sudo systemctl start ethercat
 ```
 And one can check the master status as follows:
 ```
-$ ethercat master
+etherlabmaster (master)$ ethercat master
 ```
 
 

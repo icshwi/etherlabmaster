@@ -12,3 +12,4 @@ core.*
 \#*
 .cvsignore
 *_old/
+etherlabmaster-code
