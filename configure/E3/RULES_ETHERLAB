@@ -23,39 +23,43 @@ help:
 
 default: help
 
-## Install : $(E3_MODULE_NAME)
+## Install : EtherCAT Master Library, Header Files, and Program
 install: uninstall 
 	$(QUIET) $(SUDOBASH) '$(E3_MODULE_MAKE_CMDS) install'
 
-## Uninstall : $(E3_MODULE_NAME)
+## Bninstall : EtherCAT Master Library, Header Files, and Program
 uninstall: conf
 	$(QUIET) $(SUDOBASH) '$(E3_MODULE_MAKE_CMDS) uninstall'
 
-## Build the EPICS Module : $(E3_MODULE_NAME)
+
 # Build always the Module with the EPICS_MODULES_TAG
+## Build: EtherCAT Master Library and Program
 build: autoconf
 	$(QUIET) $(E3_MODULE_MAKE_CMDS) build
 
 
-## Clean, build, and install the EPICS Module : $(E3_MODULE_NAME)
+## Clean, build, and install the EPICS Module : EtherCAT Master Library, Header Files, and Program
 rebuild: clean build install
 
 
-## Clean : $(E3_MODULE_NAME)
+## Clean : EtherCAT Master Library, Header Files, and Program
 clean: conf
 	$(QUIET) $(E3_MODULE_MAKE_CMDS) clean
 
+## Distclean : Clean and Remove the Cloned Source
 distclean: clean
 	rm -rf $(E3_MODULE_SRC_PATH)	
 
 modules: modules_build modules_install
 
 
+## modules_build : EtherCAT Master Kernel Modules Compiliation
 modules_build:
 	$(QUIET) $(E3_MODULE_MAKE_CMDS) modules
 
 
 # always sudo is needed
+## modules_install : EtherCAT Master Kernel Modules Installation
 modules_install:
 	$(QUIET) sudo -E bash -c '$(E3_MODULE_MAKE_CMDS) modules_install'
 
@@ -63,7 +67,7 @@ modules_install:
 autoconf: conf
 	$(QUIET) $(E3_MODULE_MAKE_CMDS) autoconf
 
-## 
+
 conf: 
 	$(QUIET) install -m 644 $(TOP)/$(E3_MODULE_MAKEFILE)  $(E3_MODULE_SRC_PATH)/
 
@@ -73,12 +77,13 @@ conf:
 #setup:
 #	$(QUIET) bash $(TOP)/scripts/etherlab_setup.bash -t $(E3_MODULES_VENDOR_LIBS_LOCATION)
 
+## Setup: Configuration for EtherCAT Master (systemd, ethercat.conf, and others)
 setup:
 	$(QUIET) bash $(TOP)/scripts/etherlab_setup.bash -t $(E3_ETHERLAB_INSTALL_LOCATION)
 
 .PHONY: init $(E3_MODULE_SRC_PATH)
 
-## Initialize : 
+## Init: Cloning the EtherCAT Master Source and Change it to the Specific Revision
 init:
 	hg clone http://hg.code.sf.net/p/etherlabmaster/code $(E3_MODULE_SRC_PATH) -r $(E3_ETHERLAB_BRANCH)
 	cd $(E3_MODULE_SRC_PATH) && hg update -r $(EPICS_MODULE_TAG)
