@@ -24,7 +24,7 @@ help:
 default: help
 
 ## Install : EtherCAT Master Library, Header Files, and Program
-install: uninstall 
+install: 
 	$(QUIET) $(SUDOBASH) '$(E3_MODULE_MAKE_CMDS) install'
 
 ## Bninstall : EtherCAT Master Library, Header Files, and Program
