@@ -252,6 +252,11 @@ ECAT_SYSTEMD_PATH=${ETHERLAB_TARGET_PATH}/lib/systemd/system
 ECAT_CONF_PATH=${ETHERLAB_TARGET_PATH}/etc
 ETHERCAT_CONFIG=${ECAT_CONF_PATH}/${ECAT_MASTER_CONF}
 
+echo ">>> ---------------------------------------"
+echo "ECAT_SYSTEMD_PATH : ${ECAT_SYSTEMD_PATH}"
+echo "ECAT_CONF_PATH    : ${ECAT_CONF_PATH}"
+echo "ETHERCAT_CONFIG   : ${ETHERCAT_CONFIG}"
+
 
 ## Determine CentOS or Debian, because systemd path is different
 

@@ -50,11 +50,8 @@ clean: conf
 distclean: clean
 	rm -rf $(E3_MODULE_SRC_PATH)	
 
-modules: modules_build modules_install
-
-
-## modules_build : EtherCAT Master Kernel Modules Compiliation
-modules_build:
+## modules : EtherCAT Master Kernel Modules Compiliation
+modules:
 	$(QUIET) $(E3_MODULE_MAKE_CMDS) modules
 
 
