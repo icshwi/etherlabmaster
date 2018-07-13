@@ -17,7 +17,7 @@ etherlabmaster (master)$ make init
 etherlabmaster (master)$ make patch
 etherlabmaster (master)$ make build
 etherlabmaster (master)$ make install
-etherlabmaster (master)$ make modules_build
+etherlabmaster (master)$ make modules
 etherlabmaster (master)$ make modules_install
 ```
 
