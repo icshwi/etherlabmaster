@@ -9,8 +9,14 @@ In order to download, install, setup all relevant components (system library, ke
 
 ## Rules
 
-Please execute one by one in order. 
+Before the setup the etherlab master, one should define the network port which one would like to use as the EtherCAT Master. Please look at scripts/ethercatmaster.conf, and enable one and disable all others to match the device which one would like to use. With the following command, without changing git status, one can set the master device in the etherlab master configuration:
 
+```
+etherlabmaster (master)$ echo "ETHERCAT_MASTER0=eth0" > ethercatmaster.local
+```
+The local file will be used to override the ETHERCAT_MASTER0 variable defined in scripts/ethercatmaster.conf.
+
+You are ready to do the following commands in the specific order:
 
 ```
 etherlabmaster (master)$ make init
@@ -19,16 +25,6 @@ etherlabmaster (master)$ make build
 etherlabmaster (master)$ make install
 etherlabmaster (master)$ make modules
 etherlabmaster (master)$ make modules_install
-```
-
-Before the setup the etherlab master, one should define the network port which one would like to use as the EtherCAT Master. Please look at scripts/ethercatmaster.conf, and enable one and disable all others to match the device which one would like to use. With the local setup, which doesn't change any git status , one can set the master device as follows:
-
-```
-etherlabmaster (master)$ echo "ETHERCAT_MASTER0=eth0" > ethercatmaster.local
-```
-The local file will be used to override the ETHERCAT_MASTER0 variable defined in scripts/ethercatmaster.conf. After that, 
-
-```
 etherlabmaster (master)$ make setup
 ```
 
