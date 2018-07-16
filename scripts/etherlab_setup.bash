@@ -18,8 +18,8 @@
 #
 # Author  : Jeong Han Lee
 # email   : jeonghan.lee@gmail.com
-# Date    : Friday, May 25 00:13:59 CEST 2018
-# version : 0.0.3
+# Date    : Sunday, May 27 21:10:29 CEST 2018
+# version : 0.0.4
 
 declare -gr SC_SCRIPT="$(realpath "$0")"
 declare -gr SC_SCRIPTNAME=${0##*/}
@@ -27,9 +27,18 @@ declare -gr SC_TOP="${SC_SCRIPT%/*}"
 
 declare -gr SUDO_CMD="sudo";
 
+EXIST=1
+NON_EXIST=0
 
 set -a
 . ${SC_TOP}/ethercatmaster.conf
+if [ -r ${SC_TOP}/../ethercatmaster.local ]; then
+    printf ">>> We've found the local configuration file.\n";
+    printf "    The original ETHERCAT_MASTER0 = %s\n" "${ETHERCAT_MASTER0}"
+    . ${SC_TOP}/../ethercatmaster.local
+    printf "    will be overriden with ETHERCAT_MASTER0 = %s\n\n" "${ETHERCAT_MASTER0}"
+    
+fi
 set +a
 
 
@@ -50,6 +59,23 @@ KMOD_PERMISSON="666"
 ECAT_SYSTEMD_PATH=""
 ECAT_CONF_PATH=""
 ETHERCAT_CONFIG=""
+
+
+function checkIfVar()
+{
+
+    local var=$1
+    local result=""
+    if [ -z "$var" ]; then
+	result=$NON_EXIST
+	# doesn't exist
+    else
+	result=$EXIST
+	# exist
+    fi
+    echo "${result}"
+}
+
 
 
 function find_dist
@@ -98,23 +124,37 @@ function activate_ethercat_master_network
 
 function setup_systemd
 {
-
-    ${SUDO_CMD} install -m 644 ${ECAT_SYSTEMD_PATH}/${ECAT_MASTER_SYSTEMD} ${SD_UNIT_PATH}/
-    
-    ${SUDO_CMD} systemctl daemon-reload;
-    
-    ${SUDO_CMD} systemctl enable ${ECAT_MASTER_SYSTEMD};
-    
     mac_address=$(get_macaddr ${ETHERCAT_MASTER0});
+    
 
-    printf ">>> Set up EtherCAT Master ... \n";
-    printf "%s : %s\n" "${ETHERCAT_MASTER0}" "${mac_address}"
-    
-    m4 -D_MASTER0_DEVICE="${mac_address}" -D_DEVICE_MODULES="${ECAT_KMOD_GENERIC_NAME}" ${SC_TOP}/ethercat.conf.m4 > ${SC_TOP}/ethercat.conf_temp
-    
-    ${SUDO_CMD} install -m 644 ${SC_TOP}/ethercat.conf_temp ${ETHERCAT_CONFIG}
-    
-    rm ${SC_TOP}/ethercat.conf_temp
+    if [[ $(checkIfVar "${mac_address}") -eq "$EXIST" ]]; then
+
+  
+	printf ">>> Set up EtherCAT Master ... \n";
+	printf "    %s : %s\n" "${ETHERCAT_MASTER0}" "${mac_address}"
+	
+	m4 -D_MASTER0_DEVICE="${mac_address}" -D_DEVICE_MODULES="${ECAT_KMOD_GENERIC_NAME}" ${SC_TOP}/ethercat.conf.m4 > ${SC_TOP}/ethercat.conf_temp
+	
+	${SUDO_CMD} install -m 644 ${SC_TOP}/ethercat.conf_temp ${ETHERCAT_CONFIG}
+	rm ${SC_TOP}/ethercat.conf_temp
+
+	printf ">>> Setup the systemd in %s\n" "${SD_UNIT_PATH}"
+	
+	${SUDO_CMD} install -m 644 ${ECAT_SYSTEMD_PATH}/${ECAT_MASTER_SYSTEMD} ${SD_UNIT_PATH}/
+        ${SUDO_CMD} systemctl daemon-reload;
+        ${SUDO_CMD} systemctl enable ${ECAT_MASTER_SYSTEMD};
+
+	printf ">>> One should run the following command later\n";
+	printf "    systemctl start %s\n" "${ECAT_MASTER_SYSTEMD}"
+	printf "\n"
+  
+    else
+	printf "\n>>> We could find %s with the corresponding mac address %s\n" "${ETHERCAT_MASTER0}" "${mac_address}"
+	printf "    Please check your system properly.\n";
+	printf "    For example, one can define it via \n\n";
+	printf "    echo \"ETHERCAT_MASTER0=eth0\" > ethercatmaster.local\n\n"
+      	exit
+    fi
 
 }
 
@@ -152,10 +192,12 @@ function put_udev_rule
 	    ;;
     esac
 
-    printf ">>>>\n"
-    printf "Put the udev rule : %s in %s to be accessible via an user.\n" "$rule" "$target";
+    printf ">>> Put the udev rule : %s in %s to be accessible via an user.\n" "$rule" "$target";
+    printf "    "
     printf_tee "$rule" "$target";
-    printf "\n>>>> Check the $target with cat\n"
+    printf "\n";
+    printf "\n>>> Check the $target with cat\n"
+    printf "    "
     cat ${target}
     printf "\n"
 }
@@ -165,11 +207,11 @@ function trigger_udev_rule
 {
 
     if [ -f /bin/udevadm ]; then
-	printf "Reload udev rules, and trigger it\n"
+	printf "\n>>> Reload udev rules, and trigger it\n"
 	${SUDO_CMD} /bin/udevadm control --reload-rules
 	${SUDO_CMD} /bin/udevadm trigger
     else
-	printf "No udevadm found. Reboot the system to apply new rules!"
+	printf ">>> No udevadm found. Reboot the system to apply new rules!\n"
     fi
     
 }
@@ -209,6 +251,11 @@ shift $((OPTIND-1))
 ECAT_SYSTEMD_PATH=${ETHERLAB_TARGET_PATH}/lib/systemd/system
 ECAT_CONF_PATH=${ETHERLAB_TARGET_PATH}/etc
 ETHERCAT_CONFIG=${ECAT_CONF_PATH}/${ECAT_MASTER_CONF}
+
+echo ">>> ---------------------------------------"
+echo "ECAT_SYSTEMD_PATH : ${ECAT_SYSTEMD_PATH}"
+echo "ECAT_CONF_PATH    : ${ECAT_CONF_PATH}"
+echo "ETHERCAT_CONFIG   : ${ETHERCAT_CONFIG}"
 
 
 ## Determine CentOS or Debian, because systemd path is different
@@ -251,7 +298,7 @@ trigger_udev_rule
 
 
 ${SUDO_CMD} ln -sf ${ETHERLAB_TARGET_PATH}/bin/ethercat  /usr/bin/ethercat
-
+printf "    "
 printf_tee "${ETHERLAB_TARGET_PATH}/lib" "/etc/ld.so.conf.d/e3_ethercat.conf";
 printf "\n";
 

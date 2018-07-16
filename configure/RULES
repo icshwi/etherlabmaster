@@ -1,5 +1,4 @@
 #CONFIG
-# include $(EPICS_BASE)/configure/RULES
 
 include $(TOP)/configure/E3/DEFINES_FT
 include $(TOP)/configure/E3/RULES_PATCH
