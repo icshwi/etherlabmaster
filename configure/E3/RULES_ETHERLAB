@@ -51,15 +51,16 @@ distclean: clean
 	rm -rf $(E3_MODULE_SRC_PATH)	
 
 ## modules : EtherCAT Master Kernel Modules Compiliation
-modules:
+modules: conf
 	$(QUIET) $(E3_MODULE_MAKE_CMDS) modules
-
 
 # always sudo is needed
 ## modules_install : EtherCAT Master Kernel Modules Installation
 modules_install:
 	$(QUIET) sudo -E bash -c '$(E3_MODULE_MAKE_CMDS) modules_install'
 
+modules_uninstall:
+	$(QUIET) sudo -E bash -c '$(E3_MODULE_MAKE_CMDS) modules_uninstall'	
 
 autoconf: conf
 	$(QUIET) $(E3_MODULE_MAKE_CMDS) autoconf
@@ -67,6 +68,27 @@ autoconf: conf
 
 conf: 
 	$(QUIET) install -m 644 $(TOP)/$(E3_MODULE_MAKEFILE)  $(E3_MODULE_SRC_PATH)/
+	$(QUIET) install -m 644 $(TOP)/dkms/dkms.conf         $(E3_MODULE_SRC_PATH)/
+
+
+.PHONY: dkms_add dkms_remove dkms_build dkms_install dkms_uninstall
+
+dkms_add: conf
+	sudo -E bash -c 'ln -sf $(TOP)/$(E3_MODULE_SRC_PATH) /usr/src/$(E3_MODULE_NAME)-$(E3_MODULE_VERSION)'
+	$(QUIET) sudo -E bash -c '$(E3_MODULE_MAKE_CMDS) dkms_add'
+
+dkms_remove: conf
+	$(QUIET) sudo -E bash -c '$(E3_MODULE_MAKE_CMDS) dkms_remove'
+	     
+dkms_build:
+	$(QUIET) sudo -E bash -c '$(E3_MODULE_MAKE_CMDS) dkms_build'
+
+dkms_install:
+	$(QUIET) sudo -E bash -c '$(E3_MODULE_MAKE_CMDS) dkms_install'
+
+dkms_uninstall:
+	$(QUIET) sudo -E bash -c '$(E3_MODULE_MAKE_CMDS) dkms_uninstall'
+
 
 
 .PHONY: setup

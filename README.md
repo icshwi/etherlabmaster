@@ -16,15 +16,21 @@ etherlabmaster (master)$ echo "ETHERCAT_MASTER0=eth0" > ethercatmaster.local
 ```
 The local file will be used to override the ETHERCAT_MASTER0 variable defined in scripts/ethercatmaster.conf.
 
-You are ready to do the following commands in the specific order:
+Be ready to do the following commands in the specific order:
 
 ```
 etherlabmaster (master)$ make init
 etherlabmaster (master)$ make patch
 etherlabmaster (master)$ make build
 etherlabmaster (master)$ make install
-etherlabmaster (master)$ make modules
-etherlabmaster (master)$ make modules_install
+```
+
+Kernel modules are built via dkms
+
+```
+etherlabmaster (master)$ make dkms_add
+etherlabmaster (master)$ make dkms_build
+etherlabmaster (master)$ make dkms_install
 etherlabmaster (master)$ make setup
 ```
 
@@ -37,6 +43,15 @@ And one can check the master status as follows:
 etherlabmaster (master)$ ethercat master
 ```
 
+## Notice
+
+Even if we buid the kernel DKMS, one needs the following commands after new Kernel install.
+
+```
+$ sudo dkms autoinstall
+$ sudo systemctl restart ethercat
+
+```
 
 ## Steps
 
