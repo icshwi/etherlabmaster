@@ -18,8 +18,8 @@
 #
 # Author  : Jeong Han Lee
 # email   : jeonghan.lee@gmail.com
-# Date    : Thursday, July 26 01:15:45 CEST 2018
-# version : 0.0.5
+# Date    : Friday, July 27 00:06:10 CEST 2018
+# version : 0.0.6
 
 declare -gr SC_SCRIPT="$(realpath "$0")"
 declare -gr SC_SCRIPTNAME=${0##*/}
@@ -294,6 +294,11 @@ ${SUDO_CMD} -v
 activate_ethercat_master_network
 
 
+# Setup Systemd for the DKMS autoinstall
+# dkms.sevice will be started before ethercat.service be started.
+setup_dkms_systemd
+
+
 ## Setup Systemd for the etercat.service
 ## We can put all configuration files and scrpits in ${ETHERLAB_TARGET_PATH}
 ## However, we cannot put ${ECAT_MASTER_SYSTEMD} in any customzied path
@@ -306,9 +311,6 @@ put_udev_rule "${ECAT_KMOD_NAME}"
 
 trigger_udev_rule
 
-# Setup Systemd for the DKMS autoinstall
-# 
-setup_dkms_systemd
 
 
 ${SUDO_CMD} ln -sf ${ETHERLAB_TARGET_PATH}/bin/ethercat  /usr/bin/ethercat

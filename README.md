@@ -43,15 +43,6 @@ And one can check the master status as follows:
 etherlabmaster (master)$ ethercat master
 ```
 
-## Notice
-
-Even if we buid the kernel DKMS, one needs the following commands after new Kernel install.
-
-```
-$ sudo dkms autoinstall
-$ sudo systemctl restart ethercat
-
-```
 
 ## Steps
 
@@ -73,15 +64,20 @@ Fixed scheduler settings in dc_user example; use CLOCK_MONOTONIC.
 ### make install
 * Ethercat program (configuration, lib, and others) installation
 
-### make modules_build
-* Kernel modules compiliation
+### make dkms_add
+* dkms add
 
-### make modules_install
-* Kernel modules installation
+### make dkms_build
+* dkms build via dkms
+
+
+### make dkms_install
+* Kernel modules installation via dkms
 
 ### make setup
 
 * Activate the EtherCAT master Network Port
+* Setup the dkms systemd service
 * Setup the ethercat systemd service
 * Put the UDEV rule to allow an user to access the ethercat master port
 * Create the symbolic link for the ethercat executable command
