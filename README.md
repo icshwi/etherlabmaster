@@ -71,7 +71,6 @@ Fixed scheduler settings in dc_user example; use CLOCK_MONOTONIC.
 ### make dkms_build
 * dkms build via dkms
 
-
 ### make dkms_install
 * Kernel modules installation via dkms
 
