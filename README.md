@@ -58,10 +58,10 @@ Fixed scheduler settings in dc_user example; use CLOCK_MONOTONIC.
 ### make install
 * Ethercat program (configuration, lib, and others) installation
 
-### make modules_build
+### make modules build
 * Kernel modules compiliation
 
-### make modules_install
+### make modules install
 * Kernel modules installation
 
 ### make setup
