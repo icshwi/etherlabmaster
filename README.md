@@ -3,7 +3,7 @@ etherlabmaster
 Configuration Environment for EtherLab EtherCAT Master at https://sourceforge.net/projects/etherlabmaster/
 
 ## Role
-In order to download, install, setup all relevant components (system library, kernel module, ethercat configuration, and systemd service), one should do many steps manually. This repository was designed for the easy-to-reproducible enviornment for EtherLab EtherCAT Master. With the following steps, one can run the EtherCAT Master on one dedicated ethernet port within CentOS and Debian OSs.
+In order to download, install, setup all relevant components (system library, kernel module, ethercat configuration, and systemd service), one should do many steps manually. This repository was designed for the easy-to-reproducible environment for EtherLab EtherCAT Master. With the following steps, one can run the EtherCAT Master on one dedicated Ethernet port within CentOS and Debian OSs.
 
 
 
@@ -16,15 +16,21 @@ etherlabmaster (master)$ echo "ETHERCAT_MASTER0=eth0" > ethercatmaster.local
 ```
 The local file will be used to override the ETHERCAT_MASTER0 variable defined in scripts/ethercatmaster.conf.
 
-You are ready to do the following commands in the specific order:
+Be ready to do the following commands in the specific order:
 
 ```
 etherlabmaster (master)$ make init
 etherlabmaster (master)$ make patch
 etherlabmaster (master)$ make build
 etherlabmaster (master)$ make install
-etherlabmaster (master)$ make modules
-etherlabmaster (master)$ make modules_install
+```
+
+Kernel modules are built via dkms
+
+```
+etherlabmaster (master)$ make dkms_add
+etherlabmaster (master)$ make dkms_build
+etherlabmaster (master)$ make dkms_install
 etherlabmaster (master)$ make setup
 ```
 
@@ -50,7 +56,8 @@ Fixed scheduler settings in dc_user example; use CLOCK_MONOTONIC.
 ```
 ### make patch
 * We would like to keep ethercat.conf file within $PREFIX/etc path
-* [See the patch file](./patch/Site/use_prefix_for_ethercat_conf_path.p0.patch)
+* [See the patch file 1](./patch/Site/use_prefix_for_ethercat_conf_path.p0.patch)
+* [See the patch file 2](./patch/Site/after_dkms_service_patch.p0.patch)
 
 ### make build
 * Ethercat program compilation
@@ -58,15 +65,19 @@ Fixed scheduler settings in dc_user example; use CLOCK_MONOTONIC.
 ### make install
 * Ethercat program (configuration, lib, and others) installation
 
-### make modules build
-* Kernel modules compiliation
+### make dkms_add
+* dkms add
 
-### make modules install
-* Kernel modules installation
+### make dkms_build
+* dkms build via dkms
+
+### make dkms_install
+* Kernel modules installation via dkms
 
 ### make setup
 
 * Activate the EtherCAT master Network Port
+* Setup the dkms systemd service
 * Setup the ethercat systemd service
 * Put the UDEV rule to allow an user to access the ethercat master port
 * Create the symbolic link for the ethercat executable command

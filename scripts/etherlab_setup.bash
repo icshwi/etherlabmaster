@@ -18,8 +18,8 @@
 #
 # Author  : Jeong Han Lee
 # email   : jeonghan.lee@gmail.com
-# Date    : Sunday, May 27 21:10:29 CEST 2018
-# version : 0.0.4
+# Date    : Friday, July 27 00:06:10 CEST 2018
+# version : 0.0.6
 
 declare -gr SC_SCRIPT="$(realpath "$0")"
 declare -gr SC_SCRIPTNAME=${0##*/}
@@ -41,7 +41,7 @@ if [ -r ${SC_TOP}/../ethercatmaster.local ]; then
 fi
 set +a
 
-
+ECAT_DKMS_SYSTEMD=dkms.service
 ECAT_MASTER_SYSTEMD=ethercat.service
 ECAT_MASTER_CONF=ethercat.conf
 SD_UNIT_PATH_DEBIAN=/etc/systemd/system
@@ -159,7 +159,17 @@ function setup_systemd
 }
 
 
-
+function setup_dkms_systemd
+{
+    printf ">>> Setup the systemd %s in %s\n" "${ECAT_DKMS_SYSTEMD}" "${SD_UNIT_PATH}"
+    
+    ${SUDO_CMD} install -m 644 ${SC_TOP}/${ECAT_DKMS_SYSTEMD} ${SD_UNIT_PATH}/
+    ${SUDO_CMD} systemctl daemon-reload;
+    ${SUDO_CMD} systemctl enable ${ECAT_DKMS_SYSTEMD};
+    ${SUDO_CMD} systemctl start ${ECAT_DKMS_SYSTEMD};
+    printf "\n"
+    
+}
 
 # arg1 : KMOD NAME
 # arg2 : target_rootfs, if exists
@@ -284,7 +294,12 @@ ${SUDO_CMD} -v
 activate_ethercat_master_network
 
 
-## Setup Systemd
+# Setup Systemd for the DKMS autoinstall
+# dkms.sevice will be started before ethercat.service be started.
+setup_dkms_systemd
+
+
+## Setup Systemd for the etercat.service
 ## We can put all configuration files and scrpits in ${ETHERLAB_TARGET_PATH}
 ## However, we cannot put ${ECAT_MASTER_SYSTEMD} in any customzied path
 ## Therefore, we have to consider carefully which system needs the ETERLAB master.
@@ -295,6 +310,7 @@ setup_systemd
 put_udev_rule "${ECAT_KMOD_NAME}"
 
 trigger_udev_rule
+
 
 
 ${SUDO_CMD} ln -sf ${ETHERLAB_TARGET_PATH}/bin/ethercat  /usr/bin/ethercat

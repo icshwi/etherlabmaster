@@ -22,3 +22,5 @@ $hg diff script/ethercatctl.in > ../use_prefix_for_ethercat_conf_path.p0.patch
 ```
 And remove a/b in user_prefix_for_ethercat_conf_path.p0.patch manually.
 
+
+

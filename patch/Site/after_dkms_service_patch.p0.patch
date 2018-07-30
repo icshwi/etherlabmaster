@@ -1,0 +1,16 @@
+diff -r 9e65f782e8a1 script/ethercat.service.in
+--- script/ethercat.service.in	Tue Feb 13 17:16:01 2018 +0100
++++ script/ethercat.service.in	Fri Jul 27 00:04:00 2018 +0200
+@@ -9,8 +9,10 @@
+ # Uncomment this, if the generic Ethernet driver is used. It assures, that the
+ # network interfaces are configured, before the master starts.
+ #
+-#Requires=network.service # Stop master, if network is stopped
+-#After=network.service # Start master, after network is ready
++# Stop ethercat.service, if dkms.service is stopped
++Requires=dkms.service
++# Start ethercat.service, after dkms.service is ready
++After=dkms.service
+ 
+ #
+ # Uncomment this, if a native Ethernet driver is used. It assures, that the
