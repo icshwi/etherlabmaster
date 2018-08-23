@@ -100,7 +100,7 @@ function find_dist
 function get_macaddr
 {
     local dev=${1};
-    /sbin/ip addr show dev ${dev} | grep "link/ether" | awk '{print $2}'
+    cat /sys/class/net/${dev}/address
 }
 
 
@@ -277,6 +277,9 @@ case "$dist" in
 	SD_UNIT_PATH=${SD_UNIT_PATH_DEBIAN}
 	;;
     *CentOS*)
+	SD_UNIT_PATH=${SD_UNIT_PATH_CENTOS}
+	;;
+    *RedHat*)
 	SD_UNIT_PATH=${SD_UNIT_PATH_CENTOS}
 	;;
     *)
