@@ -3,7 +3,7 @@ etherlabmaster
 Configuration Environment for EtherLab EtherCAT Master at https://sourceforge.net/projects/etherlabmaster/
 
 ## Role
-In order to download, install, setup all relevant components (system library, kernel module, ethercat configuration, and systemd service), one should do many steps manually. This repository was designed for the easy-to-reproducible environment for EtherLab EtherCAT Master. With the following steps, one can run the EtherCAT Master on one dedicated Ethernet port within CentOS and Debian OSs.
+In order to download, install, setup all relevant components (system library, kernel module, ethercat configuration, and systemd service), one should do many steps manually. This repository was designed for the easy-to-reproducible environment for EtherLab EtherCAT Master. With the following steps, one can run the EtherCAT Master on one dedicated Ethernet port within CentOS, RedHat, and Debian OSs.
 
 
 
@@ -22,7 +22,7 @@ One should check the compiling options ```E3_ETHERLAB_CONF_OPTIONS``` in configu
 ```
 E3_ETHERLAB_CONF_OPTIONS = --disable-8139too --enable-generic --enable-sii-assign=yes --enable-eoe=no
 ```
-The entire ```E3_ETHERLAB_CONF_OPTIONS``` can be override with the "git-ignored" file as folows:
+The entire ```E3_ETHERLAB_CONF_OPTIONS``` can be override with the "git-ignored" file as follows:
 
 ```
 echo "E3_ETHERLAB_CONF_OPTIONS = --disable-8139too --enable-generic" > configure/CONFIG_MODULE.local

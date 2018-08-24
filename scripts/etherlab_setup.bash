@@ -1,6 +1,7 @@
 #!/bin/bash
 #
 #  Copyright (c) 2018 Jeong Han Lee
+#  Copyright (c) 2018 Ronald Mercado 
 #  Copyright (c) 2018 European Spallation Source ERIC
 #
 #  The program is free software: you can redistribute
@@ -17,9 +18,12 @@
 #  this program. If not, see https://www.gnu.org/licenses/gpl-2.0.txt
 #
 # Author  : Jeong Han Lee
+#         : Ronald Mercado 
 # email   : jeonghan.lee@gmail.com
-# Date    : Friday, July 27 00:06:10 CEST 2018
-# version : 0.0.6
+#
+# Date    : Friday, August 24 14:04:46 CEST 2018
+#
+# version : 0.0.7
 
 declare -gr SC_SCRIPT="$(realpath "$0")"
 declare -gr SC_SCRIPTNAME=${0##*/}
