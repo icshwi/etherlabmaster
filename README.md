@@ -11,14 +11,26 @@ In order to download, install, setup all relevant components (system library, ke
 
 Before the setup the etherlab master, one should define the network port which one would like to use as the EtherCAT Master. Please look at scripts/ethercatmaster.conf, and enable one and disable all others to match the device which one would like to use. With the following command, without changing git status, one can set the master device in the etherlab master configuration:
 
-```
+```sh
 etherlabmaster (master)$ echo "ETHERCAT_MASTER0=eth0" > ethercatmaster.local
 ```
 The local file will be used to override the ETHERCAT_MASTER0 variable defined in scripts/ethercatmaster.conf.
 
-Be ready to do the following commands in the specific order:
+
+One should check the compiling options ```E3_ETHERLAB_CONF_OPTIONS``` in configure/CONFIG_MODULE. The default options which ESS uses is 
 
 ```
+E3_ETHERLAB_CONF_OPTIONS = --disable-8139too --enable-generic --enable-sii-assign=yes --enable-eoe=no
+```
+The entire ```E3_ETHERLAB_CONF_OPTIONS``` can be override with the "git-ignored" file as folows:
+
+```
+echo "E3_ETHERLAB_CONF_OPTIONS = --disable-8139too --enable-generic" > configure/CONFIG_MODULE.local
+```
+
+Be ready to do the following commands in the specific order:
+
+```sh
 etherlabmaster (master)$ make init
 etherlabmaster (master)$ make patch
 etherlabmaster (master)$ make build
@@ -27,7 +39,7 @@ etherlabmaster (master)$ make install
 
 Kernel modules are built via dkms
 
-```
+```sh
 etherlabmaster (master)$ make dkms_add
 etherlabmaster (master)$ make dkms_build
 etherlabmaster (master)$ make dkms_install
@@ -35,11 +47,11 @@ etherlabmaster (master)$ make setup
 ```
 
 One should start the ethercat via
-```
+```sh
 etherlabmaster (master)$ sudo systemctl start ethercat
 ```
 And one can check the master status as follows:
-```
+```sh
 etherlabmaster (master)$ ethercat master
 ```
 

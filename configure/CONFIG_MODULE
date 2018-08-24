@@ -9,7 +9,14 @@ EPICS_MODULE_TAG:=9e65f7
 
 E3_ETHERLAB_INSTALL_LOCATION:=/opt/etherlab
 
-
+# 
+E3_ETHERLAB_CONF_OPTIONS:=--disable-8139too
+#
+E3_ETHERLAB_CONF_OPTIONS+=--enable-generic
+#
+E3_ETHERLAB_CONF_OPTIONS+=--enable-sii-assign=yes
+#
+E3_ETHERLAB_CONF_OPTIONS+=--enable-eoe=no
 
 #
 # We set this version as 1.5.2 as ESS
