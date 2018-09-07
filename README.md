@@ -1,6 +1,6 @@
 etherlabmaster
 ======
-Configuration Environment for EtherLab EtherCAT Master at https://sourceforge.net/projects/etherlabmaster/
+Configuration Environment for EtherLab IgH EtherCAT Master at https://sourceforge.net/projects/etherlabmaster/
 
 ## Role
 In order to download, install, setup all relevant components (system library, kernel module, ethercat configuration, and systemd service), one should do many steps manually. This repository was designed for the easy-to-reproducible environment for EtherLab EtherCAT Master. With the following steps, one can run the EtherCAT Master on one dedicated Ethernet port within CentOS, RedHat, and Debian OSs.
@@ -67,9 +67,8 @@ Fixed scheduler settings in dc_user example; use CLOCK_MONOTONIC.
 2018-02-13 16:16:01 
 ```
 ### make patch
-* We would like to keep ethercat.conf file within $PREFIX/etc path
-* [See the patch file 1](./patch/Site/use_prefix_for_ethercat_conf_path.p0.patch)
-* [See the patch file 2](./patch/Site/after_dkms_service_patch.p0.patch)
+* We would like to keep ethercat.conf file within $PREFIX/etc path.  [See the patch file 1](./patch/Site/use_prefix_for_ethercat_conf_path.p0.patch)
+* We need to modify the default systemd configuration file in order to use it with dkms service.  [See the patch file 2](./patch/Site/after_dkms_service_patch.p0.patch)
 
 ### make build
 * Ethercat program compilation
