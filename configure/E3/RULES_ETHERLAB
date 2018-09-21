@@ -74,11 +74,13 @@ conf:
 .PHONY: dkms_add dkms_remove dkms_build dkms_install dkms_uninstall
 
 dkms_add: conf
-	sudo -E bash -c 'ln -sf $(TOP)/$(E3_MODULE_SRC_PATH) /usr/src/$(E3_MODULE_NAME)-$(E3_MODULE_VERSION)'
+	$(QUIET) sudo install -d 755 /usr/src/$(E3_MODULE_NAME)-$(E3_MODULE_VERSION)
+	sudo cp -r $(TOP)/$(E3_MODULE_SRC_PATH)/* /usr/src/$(E3_MODULE_NAME)-$(E3_MODULE_VERSION)/
 	$(QUIET) sudo -E bash -c '$(E3_MODULE_MAKE_CMDS) dkms_add'
 
 dkms_remove: conf
 	$(QUIET) sudo -E bash -c '$(E3_MODULE_MAKE_CMDS) dkms_remove'
+	sudo rm -rf /usr/src/$(E3_MODULE_NAME)-$(E3_MODULE_VERSION)/
 	     
 dkms_build:
 	$(QUIET) sudo -E bash -c '$(E3_MODULE_MAKE_CMDS) dkms_build'
