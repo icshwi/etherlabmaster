@@ -37,7 +37,7 @@ etherlabmaster (master)$ make build
 etherlabmaster (master)$ make install
 ```
 
-Kernel modules are built via dkms
+Kernel modules are built via dkms. Note that the system should install the ```dkms``` package first. 
 
 ```sh
 etherlabmaster (master)$ make dkms_add

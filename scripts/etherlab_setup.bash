@@ -21,9 +21,9 @@
 #         : Ronald Mercado 
 # email   : jeonghan.lee@gmail.com
 #
-# Date    : Friday, August 24 14:04:46 CEST 2018
+# Date    : Monday, October 22 13:21:56 CEST 2018
 #
-# version : 0.0.7
+# version : 0.0.8
 
 declare -gr SC_SCRIPT="$(realpath "$0")"
 declare -gr SC_SCRIPTNAME=${0##*/}
@@ -274,10 +274,13 @@ echo "ETHERCAT_CONFIG   : ${ETHERCAT_CONFIG}"
 
 ## Determine CentOS or Debian, because systemd path is different
 
-dist=$(find_dist)
+dist="$(find_dist)"
 
 case "$dist" in
     *Debian*)
+	SD_UNIT_PATH=${SD_UNIT_PATH_DEBIAN}
+	;;
+    *Ubuntu*)
 	SD_UNIT_PATH=${SD_UNIT_PATH_DEBIAN}
 	;;
     *CentOS*)
