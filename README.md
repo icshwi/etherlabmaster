@@ -19,7 +19,7 @@ etherlabmaster (master)$ echo "ETHERCAT_MASTER0=enp0s25" > ethercatmaster.local
 The local file will be used to override the ETHERCAT_MASTER0 variable defined in scripts/ethercatmaster.conf.
 
 
-One should check the compiling options ```E3_ETHERLAB_CONF_OPTIONS``` in configure/CONFIG_MODULE. The default options which ESS uses is 
+One should check the compiling options ```E3_ETHERLAB_CONF_OPTIONS``` in configure/CONFIG_MODULE. The default options which ESS uses are 
 
 ```
 E3_ETHERLAB_CONF_OPTIONS = --disable-8139too --enable-generic --enable-sii-assign=yes --enable-eoe=no
