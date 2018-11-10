@@ -6,13 +6,15 @@ Configuration Environment for EtherLab IgH EtherCAT Master at https://sourceforg
 In order to download, install, setup all relevant components (system library, kernel module, ethercat configuration, and systemd service), one should do many steps manually. This repository was designed for the easy-to-reproducible environment for EtherLab EtherCAT Master. With the following steps, one can run the EtherCAT Master on one dedicated Ethernet port within CentOS, RedHat, Ubuntu, and Debian OSs.
 
 
+## Notice
+It may work with only **Generic EtherCAT Device Driver**. With limited resources, we cannot test this repository with other device drivers. And pull requests for other supports are always welcome!
 
 ## Rules
 
 Before the setup the etherlab master, one should define the network port which one would like to use as the EtherCAT Master. Please look at scripts/ethercatmaster.conf, and enable one and disable all others to match the device which one would like to use. With the following command, without changing git status, one can set the master device in the etherlab master configuration:
 
 ```sh
-etherlabmaster (master)$ echo "ETHERCAT_MASTER0=eth0" > ethercatmaster.local
+etherlabmaster (master)$ echo "ETHERCAT_MASTER0=enp0s25" > ethercatmaster.local
 ```
 The local file will be used to override the ETHERCAT_MASTER0 variable defined in scripts/ethercatmaster.conf.
 

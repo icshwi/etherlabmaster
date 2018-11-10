@@ -68,7 +68,7 @@ autoconf: conf
 
 conf: 
 	$(QUIET) install -m 644 $(TOP)/$(E3_MODULE_MAKEFILE)  $(E3_MODULE_SRC_PATH)/
-	$(QUIET) install -m 644 $(TOP)/dkms/dkms.conf         $(E3_MODULE_SRC_PATH)/
+	$(QUIET) sed -e "s:__VERSION__:$(E3_MODULE_VERSION):g" < $(TOP)/dkms/dkms.conf > $(E3_MODULE_SRC_PATH)/dkms.conf
 
 
 .PHONY: dkms_add dkms_remove dkms_build dkms_install dkms_uninstall
@@ -95,19 +95,17 @@ dkms_uninstall:
 
 .PHONY: setup
 
-#setup:
-#	$(QUIET) bash $(TOP)/scripts/etherlab_setup.bash -t $(E3_MODULES_VENDOR_LIBS_LOCATION)
-
-## Setup: Configuration for EtherCAT Master (systemd, ethercat.conf, and others)
+##  Configuration for EtherCAT Master (systemd, ethercat.conf, and others)
 setup:
 	$(QUIET) bash $(TOP)/scripts/etherlab_setup.bash -t $(E3_ETHERLAB_INSTALL_LOCATION)
 
-.PHONY: init $(E3_MODULE_SRC_PATH)
+.PHONY: init deinit
 
-## Init: Cloning the EtherCAT Master Source and Change it to the Specific Revision
+## Cloning the EtherCAT Master Source and Change it to the Specific Revision
 init:
 	hg clone http://hg.code.sf.net/p/etherlabmaster/code $(E3_MODULE_SRC_PATH) -r $(E3_ETHERLAB_BRANCH)
 	cd $(E3_MODULE_SRC_PATH) && hg update -r $(EPICS_MODULE_TAG)
 
-# init:
-# 	hg clone --rev $(EPICS_MODULE_TAG) http://hg.code.sf.net/p/etherlabmaster/code $(E3_MODULE_SRC_PATH)
+## Remove clone source files
+deinit:
+	rm -rf $(E3_MODULE_SRC_PATH)
