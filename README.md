@@ -95,3 +95,7 @@ Fixed scheduler settings in dc_user example; use CLOCK_MONOTONIC.
 * Put the UDEV rule to allow an user to access the ethercat master port
 * Create the symbolic link for the ethercat executable command
 * Put the lib path in the global ld configuration path
+
+
+### make deinit
+* Remove the downloaded etherlabmaster-code path
