@@ -99,3 +99,7 @@ Fixed scheduler settings in dc_user example; use CLOCK_MONOTONIC.
 
 ### make deinit
 * Remove the downloaded etherlabmaster-code path
+
+
+## Beckhoff CCAT FPGA Kernel Mode Driver
+* https://github.com/jeonghanlee/CCAT-env
