@@ -166,7 +166,7 @@ function setup_systemd
 function setup_dkms_systemd
 {
     printf ">>> Setup the systemd %s in %s\n" "${ECAT_DKMS_SYSTEMD}" "${SD_UNIT_PATH}"
-    
+
     ${SUDO_CMD} install -m 644 ${SC_TOP}/${ECAT_DKMS_SYSTEMD} ${SD_UNIT_PATH}/
     ${SUDO_CMD} systemctl daemon-reload;
     ${SUDO_CMD} systemctl enable ${ECAT_DKMS_SYSTEMD};

@@ -93,11 +93,16 @@ dkms_uninstall:
 
 
 
-.PHONY: setup
+.PHONY: setup setup_clean
 
 ##  Configuration for EtherCAT Master (systemd, ethercat.conf, and others)
 setup:
 	$(QUIET) bash $(TOP)/scripts/etherlab_setup.bash -t $(E3_ETHERLAB_INSTALL_LOCATION)
+
+##  Clean up the configuration for EtherCAT Master (systemd, ethercat.conf, and others)
+setup_clean:
+	$(QUIET) bash $(TOP)/scripts/etherlab_setup_clean.bash
+
 
 .PHONY: init deinit
 

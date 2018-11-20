@@ -7,7 +7,8 @@ In order to download, install, setup all relevant components (system library, ke
 
 
 ## Notice
-It may work with only **Generic EtherCAT Device Driver**. With limited resources, we cannot test this repository with other device drivers. And pull requests for other supports are always welcome!
+* It may work with only **Generic EtherCAT Device Driver**. With limited resources, we cannot test this repository with other device drivers. And pull requests for other supports are always welcome!
+* If the system has already the etherlab master kernel configuration, please don't use this before cleaning up all existent configuration.
 
 ## Rules
 
@@ -48,6 +49,7 @@ etherlabmaster (master)$ make dkms_install
 etherlabmaster (master)$ make setup
 ```
 
+
 One should start the ethercat via
 ```sh
 etherlabmaster (master)$ sudo systemctl start ethercat
@@ -57,6 +59,16 @@ And one can check the master status as follows:
 etherlabmaster (master)$ ethercat master
 ```
 
+
+In order to remove them and clean the configuration
+
+```sh
+etherlabmaster (master)$ sudo systemctl stop ethercat
+etherlabmaster (master)$ sudo systemctl disable ethercat
+etherlabmaster (master)$ make dkms_uninstall
+etherlabmaster (master)$ make dkms_remove
+etherlabmaster (master)$ make setup_clean
+```
 
 ## Steps
 
