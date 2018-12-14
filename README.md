@@ -115,3 +115,16 @@ Fixed scheduler settings in dc_user example; use CLOCK_MONOTONIC.
 
 ## Beckhoff CCAT FPGA Kernel Mode Driver
 * https://github.com/jeonghanlee/CCAT-env
+
+## Troubleshooting
+
+### make build error
+
+* need to install proper package, and reboot the system once in order to match the running kernel version and installed kernel source all together. 
+
+```
+configure: error: Failed to find Linux sources. Use --with-linux-dir!
+make[1]: *** [autoconf] Error 1
+```
+
+
