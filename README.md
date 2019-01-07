@@ -127,4 +127,32 @@ configure: error: Failed to find Linux sources. Use --with-linux-dir!
 make[1]: *** [autoconf] Error 1
 ```
 
+### cannot start systemd service
+
+
+* Disable the Secure Boot in the BIOS configuration, once one has the following error: `ERROR: could not insert 'ec_master': Required key not available`
+
+```
+$ systemctl start ethercat.service
+Job for ethercat.service failed because the control process exited with error code. See "systemctl status ethercat.service" and "journalctl -xe" for details. 
+
+$ journalctl -xe
+
+
+-- Subject: Unit ethercat.service has begun start-up
+-- Defined-By: systemd
+-- Support: http://lists.freedesktop.org/mailman/listinfo/systemd-devel
+-- 
+-- Unit ethercat.service has begun starting up.
+Jan 07 07:23:04 mcag-epics9 ethercatctl[20684]: modprobe: ERROR: could not insert 'ec_master': Required key not available
+Jan 07 07:23:04 mcag-epics9 systemd[1]: ethercat.service: main process exited, code=exited, status=1/FAILURE
+Jan 07 07:23:04 mcag-epics9 systemd[1]: Failed to start EtherCAT Master Kernel Modules.
+-- Subject: Unit ethercat.service has failed
+-- Defined-By: systemd
+-- Support: http://lists.freedesktop.org/mailman/listinfo/systemd-devel
+-- 
+-- Unit ethercat.service has failed.
+-- 
+-- The result is failed. 
+```
 
