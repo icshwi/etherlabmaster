@@ -1,8 +1,8 @@
 #!/bin/bash
 #
-#  Copyright (c) 2018 Jeong Han Lee
-#  Copyright (c) 2018 Ronald Mercado 
-#  Copyright (c) 2018 European Spallation Source ERIC
+#  Copyright (c) 2018        Jeong Han Lee
+#  Copyright (c) 2018        Ronald Mercado 
+#  Copyright (c) 2018 - 2019 European Spallation Source ERIC
 #
 #  The program is free software: you can redistribute
 #  it and/or modify it under the terms of the GNU General Public License
@@ -21,9 +21,9 @@
 #         : Ronald Mercado 
 # email   : jeonghan.lee@gmail.com
 #
-# Date    : Monday, October 22 13:21:56 CEST 2018
+# Date    : Friday, February  1 15:44:06 CET 2019
 #
-# version : 0.0.8
+# version : 0.0.9
 
 declare -gr SC_SCRIPT="$(realpath "$0")"
 declare -gr SC_SCRIPTNAME=${0##*/}
@@ -326,6 +326,7 @@ trigger_udev_rule
 ${SUDO_CMD} ln -sf ${ETHERLAB_TARGET_PATH}/bin/ethercat  /usr/bin/ethercat
 printf "    "
 printf_tee "${ETHERLAB_TARGET_PATH}/lib" "/etc/ld.so.conf.d/e3_ethercat.conf";
+${SUDO_CMD} ldconfig 
 printf "\n";
 
 
