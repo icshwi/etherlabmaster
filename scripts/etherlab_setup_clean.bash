@@ -1,7 +1,7 @@
 #!/bin/bash
 #
-#  Copyright (c) 2018 Jeong Han Lee
-#  Copyright (c) 2018 European Spallation Source ERIC
+#  Copyright (c) 2018        Jeong Han Lee
+#  Copyright (c) 2018 - 2019 European Spallation Source ERIC
 #
 #  The program is free software: you can redistribute
 #  it and/or modify it under the terms of the GNU General Public License
@@ -18,8 +18,8 @@
 #
 # Author  : Jeong Han Lee
 # email   : jeonghan.lee@gmail.com
-# Date    : Monday, October 22 13:21:56 CEST 2018
-# version : 0.0.1
+# Date    : Friday, February  1 15:50:44 CET 2019
+# version : 0.0.2
 
 declare -gr SC_SCRIPT="$(realpath "$0")"
 declare -gr SC_SCRIPTNAME=${0##*/}
@@ -248,7 +248,7 @@ fi
 CLEAN_TARGET=/etc/ld.so.conf.d/e3_ethercat.conf
 if [[ $(checkIfFile "${CLEAN_TARGET}") -eq "EXIST" ]]; then
     ${SUDO_CMD} rm -rf ${CLEAN_TARGET}
-
+    ${SUDO_CMD} ldconfig 
 fi
 
 
