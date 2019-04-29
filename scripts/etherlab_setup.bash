@@ -21,9 +21,9 @@
 #         : Ronald Mercado 
 # email   : jeonghan.lee@gmail.com
 #
-# Date    : Friday, February  1 15:44:06 CET 2019
+# Date    : Monday, April 29 12:02:10 CEST 2019
 #
-# version : 0.0.9
+# version : 0.0.10
 
 declare -gr SC_SCRIPT="$(realpath "$0")"
 declare -gr SC_SCRIPTNAME=${0##*/}
@@ -216,7 +216,34 @@ function put_udev_rule
     printf "\n"
 }
 
+# arg1 : device name
+# arg2 : target_rootfs, if exists
+function add_udev_rule_for_unmanaged
+{
+    local device=$1; shift;
+    local target_rootfs=${1}; shift;
+    local udev_rules_dir="${target_rootfs}/etc/udev/rules.d"
+    local rule="";
+    local target="";
+    # We can check the its STATE by `nmcli dev status`
+    # enp5s0      ethernet  unmanaged  --
+    #
+    # ACTION=="add", SUBSYSTEM=="net", KERNEL=="enp5s0", ENV{NM_UNMANAGED}="1"
+    #
+    rule="ACTION==\"add\", SUBSYSTEM==\"net\", KERNEL==\"${device}\", ENV{NM_UNMANAGED}=\"1\"";
+    target="${udev_rules_dir}/00-unmanaged-device-by-nm.rules";
 
+    printf ">>> Put the udev rule : %s in %s to be accessible via an user.\n" "$rule" "$target";
+    printf "    "
+    printf_tee "$rule" "$target";
+    printf "\n";
+    printf "\n>>> Check the $target with cat\n"
+    printf "    "
+    cat ${target}
+    printf "\n"
+}
+
+ 
 function trigger_udev_rule
 {
 
@@ -318,9 +345,9 @@ setup_systemd
 
 
 put_udev_rule "${ECAT_KMOD_NAME}"
+add_udev_rule_for_unmanaged "${ETHERCAT_MASTER0}"
 
 trigger_udev_rule
-
 
 
 ${SUDO_CMD} ln -sf ${ETHERLAB_TARGET_PATH}/bin/ethercat  /usr/bin/ethercat
@@ -329,4 +356,8 @@ printf_tee "${ETHERLAB_TARGET_PATH}/lib" "/etc/ld.so.conf.d/e3_ethercat.conf";
 ${SUDO_CMD} ldconfig 
 printf "\n";
 
+
+printf ">>>\n";
+printf "It is mandatory to reboot your system once\n";
+printf ">>>\n";
 

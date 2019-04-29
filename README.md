@@ -105,6 +105,7 @@ Fixed scheduler settings in dc_user example; use CLOCK_MONOTONIC.
 * Setup the dkms systemd service
 * Setup the ethercat systemd service
 * Put the UDEV rule to allow an user to access the ethercat master port
+* Put the UDEV rule to do *unmanaged*able on the ethercat master port by NetworkManager
 * Create the symbolic link for the ethercat executable command
 * Put the lib path in the global ld configuration path
 
