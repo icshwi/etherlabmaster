@@ -2,15 +2,29 @@
 # SUDO_INFO 1 : SUDO is needed (NOT writable)
 # SUDO_INFO 0 : SUDO is not needed
 SUDO_INFO := $(shell test -w $(E3_ETHERLAB_INSTALL_LOCATION) 1>&2 2> /dev/null; echo $$?)
+SUDO_CMD := $(shell which sudo)
 
+# For CentOS, devtoolset-{7,8} has -E option within sudo shell
+# So we have to remove -E option as well if we would like to use devtoolset
+#
 ifeq "$(SUDO_INFO)" "1"
-SUDO := sudo
-SUDOBASH = $(SUDO) -E
-SUDOBASH += bash -c
+ifneq (,$(findstring devtoolset,$(SUDO_CMD)))
+SUDO = $(SUDO_CMD)
+else
+SUDO = $(SUDO_CMD) -E
+endif
+SUDOBASH := $(SUDO) bash -c
 else
 SUDO :=
 SUDOBASH = bash -c
-endif    
+endif
+
+
+ifneq (,$(findstring devtoolset,$(SUDO_CMD)))
+SUDO2 := $(SUDO_CMD) bash -c
+else
+SUDO2 := $(SUDO_CMD) -E bash -c
+endif
 
 
 # Valid for only Development Mode, because we clone/remove them

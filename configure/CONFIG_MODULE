@@ -5,7 +5,7 @@ EPICS_MODULE_NAME:=etherlabmaster
 #  [9e65f7] (stable-1.5, tip) by Florian Pose
 # Fixed scheduler settings in dc_user example; use CLOCK_MONOTONIC.
 #	2018-02-13 16:16:01 
-EPICS_MODULE_TAG:=9e65f7
+EPICS_MODULE_TAG=9e65f782e8a1
 
 E3_ETHERLAB_INSTALL_LOCATION:=/opt/etherlab
 
@@ -22,7 +22,10 @@ E3_ETHERLAB_CONF_OPTIONS+=--enable-eoe=no
 # We set this version as 1.5.2 as ESS
 # However, we don't use this, because we would like to keep etherlabmaster away from E3 directory and building system.
 
-E3_MODULE_VERSION:=1.5.2
+E3_MODULE_VERSION=1.5.2
+
+
+WITH_PATCHSET:=YES
 
 
 # In most case, we don't need to touch the following variables.
