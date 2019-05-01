@@ -65,6 +65,17 @@ Be ready to do the following commands in the specific order:
 
 ```sh
 etherlabmaster (master)$ make init
+```
+
+* Select the proper options
+
+* Check the options
+
+```
+etherlabmaster (master)$ make showopts
+```
+
+```
 etherlabmaster (master)$ make build
 etherlabmaster (master)$ make install
 ```
@@ -151,6 +162,18 @@ One can use the unofficial patchset maintained by Gavin Lambert [2] with the loc
 
 ```sh
 etherlabmaster (master)$ make patchset
+```
+
+* Select the proper options
+
+* Check the options
+
+```
+etherlabmaster (master)$ make showopts
+```
+
+
+```sh
 etherlabmaster (master)$ make build
 etherlabmaster (master)$ make install
 ```
