@@ -1,6 +1,9 @@
 
 E3_MODULES_VARIABLES:=$(sort $(filter-out $(VARS_EXCLUDES) VARS_EXCLUDES,$(.VARIABLES)))
 
+DEV_OPTS_VARS:=$(filter WITH_DEV_%, $(E3_MODULES_VARIABLES))
+ENABLE_OPTS_VARS:=$(filter ENABLE_%, $(E3_MODULES_VARIABLES))
+
 .PHONY : env vars header
 
 ## Print interesting VARIABLES
@@ -18,3 +21,23 @@ header:
 
 
 patchsetvars: vars
+
+
+showopts: optsheader showdevopts showenableppts
+
+showdevopts:
+	$(foreach v, $(DEV_OPTS_VARS), $(info $(v) = $($(v)))) @#noop
+	$(QUIET)echo ""
+
+showenableppts:
+	$(foreach v, $(ENABLE_OPTS_VARS), $(info $(v) = $($(v)))) @#noop
+	$(QUIET)echo ""
+
+optsheader:
+	$(QUIET)echo ""
+	$(QUIET)echo ">>>>  Configuration Options Variables   <<<<"
+	$(QUIET)echo ""
+	$(QUIET)echo "E3_EHTERLAB_CONF_OPTIONS is defined as the follows:"
+	$(QUIET)echo ""
+	$(QUIET)echo "$(E3_ETHERLAB_CONF_OPTIONS)"
+	$(QUIET)echo ""

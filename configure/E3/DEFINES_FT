@@ -60,5 +60,7 @@ VARS_EXCLUDES+=git_update
 VARS_EXCLUDES+=git_module_init_update
 VARS_EXCLUDES+=patch_site
 VARS_EXCLUDES+=patch_revert_site
+VARS_EXCLUDES+=patchset
+VARS_EXCLUDES+=patchset_revert
 VARS_EXCLUDES+=QUIET
 VARS_EXCLUDES+=SHELL

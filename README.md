@@ -2,6 +2,8 @@ etherlabmaster
 ======
 Configuration Environment for EtherLab IgH EtherCAT Master at https://sourceforge.net/projects/etherlabmaster/
 
+**Please use the recent release version instead of the master branch.**
+
 ## Role
 In order to download, install, setup all relevant components (system library, kernel module, ethercat configuration, and systemd service), one should do many steps manually. This repository was designed for the easy-to-reproducible environment for EtherLab EtherCAT Master. With the following steps, one can run the EtherCAT Master on one dedicated Ethernet port within CentOS, RedHat, Ubuntu, and Debian OSs.
 
@@ -20,16 +22,44 @@ etherlabmaster (master)$ echo "ETHERCAT_MASTER0=enp0s25" > ethercatmaster.local
 The local file will be used to override the ETHERCAT_MASTER0 variable defined in scripts/ethercatmaster.conf.
 
 
-One should check the compiling options ```E3_ETHERLAB_CONF_OPTIONS``` in configure/CONFIG_MODULE. The default options which ESS uses are 
+One should check the autoconf configuration options, which are relevant for our application currently. These options are defined in `configure/CONFIG_OPTIONS` are defined when `make build` or `make autoconf` by using `E3_EHTERLAB_CONF_OPTIONS`. One can see them all via `make showopts` such as
+```
+$ make showopts
 
-```
-E3_ETHERLAB_CONF_OPTIONS = --disable-8139too --enable-generic --enable-sii-assign=yes --enable-eoe=no
-```
-The entire ```E3_ETHERLAB_CONF_OPTIONS``` can be override with the "git-ignored" file as follows:
+>>>>  Configuration Options Variables   <<<<
 
+E3_EHTERLAB_CONF_OPTIONS is defined as the follows:
+
+--enable-generic --disable-8139too --disable-e100 --disable-e1000 --disable-e1000e --disable-igb --disable-r8169 --disable-ccat --enable-static=no --enable-shared=yes --enable-eoe=no --enable-cycles=no --enable-hrtimer=no --enable-regalias=no --enable-tool=yes --enable-userlib=yes --enable-sii-assign=yes --enable-rt-syslog=yes
+
+WITH_DEV_8139TOO = NO
+WITH_DEV_CCAT = NO
+WITH_DEV_E100 = NO
+WITH_DEV_E1000 = NO
+WITH_DEV_E1000E = NO
+WITH_DEV_GENERIC = YES
+WITH_DEV_IGB = NO
+WITH_DEV_R8169 = NO
+
+ENABLE_CYCLES = NO
+ENABLE_EOE = NO
+ENABLE_HRTIMER = NO
+ENABLE_REGALIAS = NO
+ENABLE_RT_SYSLOG = YES
+ENABLE_SII_ASSIGN = YES
+ENABLE_STATIC = NO
+ENABLE_TOOL = YES
+ENABLE_USERLIB = YES
 ```
-echo "E3_ETHERLAB_CONF_OPTIONS = --disable-8139too --enable-generic" > configure/CONFIG_MODULE.local
+The most options are default, but we would like to keep the Site-specific options consistently. Note that the current implementation is so-called *work in progress* because of the dkms configuration. 
+
+One can override each options as follows:
 ```
+echo "WITH_DEV_GENERIC = NO" > configure/CONFIG_OPTIONS.local
+echo "ENABLE_STATIC = YES"  >> configure/CONFIG_OPTIONS.local
+```
+, where `>>` is the important thing if one would like to override more than one option. 
+
 
 Be ready to do the following commands in the specific order:
 
