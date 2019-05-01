@@ -63,7 +63,7 @@ modules_uninstall:
 	$(QUIET) $(SUDO2) '$(E3_MODULE_MAKE_CMDS) modules_uninstall'	
 
 
-
+## Autoconf on E3_MODULE_SRC_PATH
 autoconf: conf
 	$(QUIET) $(E3_MODULE_MAKE_CMDS) autoconf
 

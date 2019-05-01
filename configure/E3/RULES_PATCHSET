@@ -8,9 +8,14 @@ HG_CFG:=$(HOME)/.hgrc
 ## an unofficial patchset maintained by Gavin Lambert <gavin.lambert@tomra.com>
 ## http://hg.code.sf.net/u/uecasm/etherlab-patches
 ##
-patchset: deinit patchset_hgcfg orig_patchset  patchset_patch
 ifeq ($(WITH_PATCHSET),YES)
+patchset: deinit patchset_hgcfg orig_patchset  patchset_patch
 	$(MAKE) patch
+else
+patchset:
+	$(QUIET) echo ">>"
+	$(QUIET) echo "  Please add  WITH_PATCHSET=YES within configure/CONFIG_OPTIONS via"
+	$(QUIET) echo "  echo \"WITH_PATCHSET=YES\" >> configure/CONFIG_OPTIONS.local"
 endif
 
 
