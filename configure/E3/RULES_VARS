@@ -4,7 +4,7 @@ E3_MODULES_VARIABLES:=$(sort $(filter-out $(VARS_EXCLUDES) VARS_EXCLUDES,$(.VARI
 DEV_OPTS_VARS:=$(filter WITH_DEV_%, $(E3_MODULES_VARIABLES))
 ENABLE_OPTS_VARS:=$(filter ENABLE_%, $(E3_MODULES_VARIABLES))
 
-.PHONY : env vars header
+.PHONY: env vars header
 
 ## Print interesting VARIABLES
 env: vars
@@ -19,6 +19,8 @@ header:
 	$(QUIET)echo "------------------------------------------------------------"
 	$(QUIET)echo ""
 
+
+.PHONY: patchsetvars showopts showdevopts showenableppts optsheader show_netdrv
 
 patchsetvars: vars
 
@@ -41,3 +43,8 @@ optsheader:
 	$(QUIET)echo ""
 	$(QUIET)echo "$(E3_ETHERLAB_CONF_OPTIONS)"
 	$(QUIET)echo ""
+
+
+show_netdrv:
+	$(QUIET)grep -r 'DRIVER'  /sys/class/net/*/device/uevent | grep -e $(ETHERCAT_MASTER0)
+

@@ -144,10 +144,6 @@ etherlabmaster (master)$ make setup_clean
 * Remove the downloaded etherlabmaster-code path
 
 
-## Beckhoff CCAT FPGA Kernel Mode Driver
-* https://github.com/jeonghanlee/CCAT-env
-
-
 ## Etherlab master patchset 20180622
 
 One can use the unofficial patchset maintained by Gavin Lambert [2] with the local patch file [3], because the unofficial patchset is *ONLY* valid for `--enable-eoe=yes`.  The local `make patch` is executed after all patchset. So we don't need to run it individually. 
@@ -167,6 +163,15 @@ etherlabmaster (master)$ make dkms_build
 etherlabmaster (master)$ make dkms_install
 etherlabmaster (master)$ make setup
 ```
+
+## Identify the Network Card Driver
+
+It uses the default variable which one has to set as `ETHERCAT_MASTER0` at the beginning in order to find the proper driver, which one may select it properly.
+```
+$ make show_netdrv
+/sys/class/net/enp0s25/device/uevent:DRIVER=e1000e
+```
+
 
 ## Troubleshooting
 
@@ -219,4 +224,9 @@ Jan 07 07:23:04 mcag-epics9 systemd[1]: Failed to start EtherCAT Master Kernel M
 #### [2] http://hg.code.sf.net/u/uecasm/etherlab-patches  
 
 
-#### [3] patch/patchset/000.patchset_optional_eoe.p0.patch 
+#### [3] [patch/patchset/000.patchset_optional_eoe.p0.patch](./patch/patchset/000.patchset_optional_eoe.p0.patch)
+
+
+#### Beckhoff CCAT FPGA Kernel Mode Driver 
+
+* https://github.com/jeonghanlee/CCAT-env
