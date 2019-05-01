@@ -23,10 +23,27 @@ endef
 
 define patch_revert_site
 for i in $(wildcard $(TOP)/patch/Site/*p0.patch); do\
-	printf "\nPatching %s with the file : %s\n" "$(E3_MODULE_SRC_PATH)" "$$i";\
+	printf "\nRevering path %s with the file : %s\n" "$(E3_MODULE_SRC_PATH)" "$$i";\
 	patch -R -d $(E3_MODULE_SRC_PATH) --ignore-whitespace -p0 < $$i;\
 done
 endef
+
+
+define patchset
+for i in $(wildcard $(TOP)/patch/patchset/*p0.patch); do\
+	printf "\nPatching %s with the Patchset file : %s\n" "$(E3_MODULE_SRC_PATH)" "$$i";\
+	patch -d $(E3_MODULE_SRC_PATH) --ignore-whitespace -p0 < $$i;\
+done
+endef
+
+
+define patchset_revert
+for i in $(wildcard $(TOP)/patch/patchset/*p0.patch); do\
+	printf "\nRevering path %s with the Patchset file : %s\n" "$(E3_MODULE_SRC_PATH)" "$$i";\
+	patch -R -d $(E3_MODULE_SRC_PATH) --ignore-whitespace -p0 < $$i;\
+done
+endef
+
 
 
 ifndef VERBOSE

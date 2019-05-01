@@ -9,7 +9,8 @@ EPICS_MODULE_NAME:=etherlabmaster
 # date:        Tue Jan 22 14:34:55 2019 +0100
 # summary:     Added extern "C" for floating-point functions.
 EPICS_MODULE_TAG:=5f29e43487df
-#EPICS_MODULE_TAG:=9e65f7
+#EPICS_MODULE_TAG:=9e65f782e8a1
+
 
 E3_ETHERLAB_INSTALL_LOCATION:=/opt/etherlab
 
@@ -17,8 +18,7 @@ E3_ETHERLAB_INSTALL_LOCATION:=/opt/etherlab
 # We set this version as 1.5.2 as ESS
 # However, we don't use this, because we would like to keep etherlabmaster away from E3 directory and building system.
 
-E3_MODULE_VERSION:=1.5.2
-
+E3_MODULE_VERSION=1.5.2
 
 # In most case, we don't need to touch the following variables.
 #

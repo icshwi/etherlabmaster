@@ -35,7 +35,6 @@ Be ready to do the following commands in the specific order:
 
 ```sh
 etherlabmaster (master)$ make init
-etherlabmaster (master)$ make patch
 etherlabmaster (master)$ make build
 etherlabmaster (master)$ make install
 ```
@@ -75,6 +74,7 @@ etherlabmaster (master)$ make setup_clean
 ### make init
 * Download the main etherlabmaster-code from sf.net
 * Switch to Revison 9e65f7. We are using the following master revision number as the starting point  
+* Apply the Site Specific local patch files. See Ref [1].
 ```
 # jhlee@hadron: etherlabmaster-code (master)$ hg heads
 # changeset:   2295:5f29e43487df
@@ -84,10 +84,6 @@ etherlabmaster (master)$ make setup_clean
 # date:        Tue Jan 22 14:34:55 2019 +0100
 # summary:     Added extern "C" for floating-point functions.
 ```
-### make patch
-* We would like to keep ethercat.conf file within $PREFIX/etc path.  [See the patch file 1](./patch/Site/use_prefix_for_ethercat_conf_path.p0.patch)
-* We need to modify the default systemd configuration file in order to use it with dkms service.  [See the patch file 2](./patch/Site/after_dkms_service_patch.p0.patch)
-
 ### make build
 * Ethercat program compilation
 
@@ -120,6 +116,27 @@ etherlabmaster (master)$ make setup_clean
 
 ## Beckhoff CCAT FPGA Kernel Mode Driver
 * https://github.com/jeonghanlee/CCAT-env
+
+
+## Etherlab master patchset 20180622
+
+One can use the unofficial patchset maintained by Gavin Lambert [2] with the local patch file [3], because the unofficial patchset is *ONLY* valid for `--enable-eoe=yes`.  The local `make patch` is executed after all patchset. So we don't need to run it individually. 
+
+
+```sh
+etherlabmaster (master)$ make patchset
+etherlabmaster (master)$ make build
+etherlabmaster (master)$ make install
+```
+
+Kernel modules are built via dkms. Note that the system should install the `dkms` package first. 
+
+```sh
+etherlabmaster (master)$ make dkms_add
+etherlabmaster (master)$ make dkms_build
+etherlabmaster (master)$ make dkms_install
+etherlabmaster (master)$ make setup
+```
 
 ## Troubleshooting
 
@@ -161,3 +178,15 @@ Jan 07 07:23:04 mcag-epics9 systemd[1]: Failed to start EtherCAT Master Kernel M
 -- The result is failed. 
 ```
 
+
+### References
+
+#### [1] *make patch*  
+
+* We would like to keep ethercat.conf file within $PREFIX/etc path.  [See the patch file 1](./patch/Site/use_prefix_for_ethercat_conf_path.p0.patch)
+* We need to modify the default systemd configuration file in order to use it with dkms service.  [See the patch file 2](./patch/Site/after_dkms_service_patch.p0.patch)
+
+#### [2] http://hg.code.sf.net/u/uecasm/etherlab-patches  
+
+
+#### [3] patch/patchset/000.patchset_optional_eoe.p0.patch 

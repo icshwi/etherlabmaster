@@ -1,0 +1,349 @@
+diff -r b53d093bc4ae master/Kbuild.in
+--- master/Kbuild.in	Thu Feb 01 11:00:00 2018 +1200
++++ master/Kbuild.in	Tue Apr 30 00:28:38 2019 +0200
+@@ -40,12 +40,10 @@
+ 	datagram_pair.o \
+ 	device.o \
+ 	domain.o \
+-	eoe_request.o \
+ 	fmmu_config.o \
+ 	foe_request.o \
+ 	fsm_change.o \
+ 	fsm_coe.o \
+-	fsm_eoe.o \
+ 	fsm_foe.o \
+ 	fsm_reboot.o \
+ 	fsm_master.o \
+@@ -78,6 +76,8 @@
+ 	dict_request.o
+ 
+ ifeq (@ENABLE_EOE@,1)
++ec_master-objs += eoe_request.o
++ec_master-objs += fsm_eoe.o
+ ec_master-objs += ethernet.o
+ endif
+ 
+diff -r b53d093bc4ae master/fsm_slave.c
+--- master/fsm_slave.c	Thu Feb 01 11:00:00 2018 +1200
++++ master/fsm_slave.c	Tue Apr 30 00:28:38 2019 +0200
+@@ -61,7 +61,9 @@
+ int ec_fsm_slave_action_process_soe(ec_fsm_slave_t *, ec_datagram_t *);
+ void ec_fsm_slave_state_soe_request(ec_fsm_slave_t *, ec_datagram_t *);
+ int ec_fsm_slave_action_process_eoe(ec_fsm_slave_t *, ec_datagram_t *);
++#ifdef EC_EOE
+ void ec_fsm_slave_state_eoe_request(ec_fsm_slave_t *, ec_datagram_t *);
++#endif
+ 
+ /*****************************************************************************/
+ 
+@@ -81,7 +83,9 @@
+     fsm->reg_request = NULL;
+     fsm->foe_request = NULL;
+     fsm->soe_request = NULL;
++#ifdef EC_EOE
+     fsm->eoe_request = NULL;
++#endif
+     fsm->dict_request = NULL;
+ 
+     ec_dict_request_init(&fsm->int_dict_request);
+@@ -90,7 +94,9 @@
+     ec_fsm_coe_init(&fsm->fsm_coe);
+     ec_fsm_foe_init(&fsm->fsm_foe);
+     ec_fsm_soe_init(&fsm->fsm_soe);
++#ifdef EC_EOE
+     ec_fsm_eoe_init(&fsm->fsm_eoe);
++#endif
+     ec_fsm_pdo_init(&fsm->fsm_pdo, &fsm->fsm_coe);
+     ec_fsm_change_init(&fsm->fsm_change);
+     ec_fsm_slave_config_init(&fsm->fsm_slave_config, fsm->slave,
+@@ -132,12 +138,12 @@
+         fsm->soe_request->state = EC_INT_REQUEST_FAILURE;
+         wake_up_all(&fsm->slave->master->request_queue);
+     }
+-
++#ifdef EC_EOE
+     if (fsm->eoe_request) {
+         fsm->soe_request->state = EC_INT_REQUEST_FAILURE;
+         wake_up_all(&fsm->slave->master->request_queue);
+     }
+-
++#endif
+     if (fsm->dict_request) {
+         fsm->dict_request->state = EC_INT_REQUEST_FAILURE;
+         wake_up_all(&fsm->slave->master->request_queue);
+@@ -151,7 +157,9 @@
+     ec_fsm_coe_clear(&fsm->fsm_coe);
+     ec_fsm_foe_clear(&fsm->fsm_foe);
+     ec_fsm_soe_clear(&fsm->fsm_soe);
++#ifdef EC_EOE
+     ec_fsm_eoe_clear(&fsm->fsm_eoe);
++#endif
+ }
+ 
+ /*****************************************************************************/
+@@ -291,11 +299,12 @@
+     if (ec_fsm_slave_action_process_soe(fsm, datagram)) {
+         return;
+     }
+-
++#ifdef EC_EOE
+     // Check for pending EoE IP parameter requests
+     if (ec_fsm_slave_action_process_eoe(fsm, datagram)) {
+         return;
+     }
++#endif
+ }
+ 
+ /*****************************************************************************/
+@@ -1140,7 +1149,7 @@
+ }
+ 
+ /*****************************************************************************/
+-
++#ifdef EC_EOE
+ /** Check for pending EoE IP parameter requests and process one.
+  *
+  * \return non-zero, if a request is processed.
+@@ -1220,5 +1229,5 @@
+     fsm->eoe_request = NULL;
+     fsm->state = ec_fsm_slave_state_ready;
+ }
+-
++#endif
+ /*****************************************************************************/
+diff -r b53d093bc4ae master/fsm_slave.h
+--- master/fsm_slave.h	Thu Feb 01 11:00:00 2018 +1200
++++ master/fsm_slave.h	Tue Apr 30 00:28:38 2019 +0200
+@@ -46,7 +46,9 @@
+ #include "fsm_coe.h"
+ #include "fsm_foe.h"
+ #include "fsm_soe.h"
++#ifdef EC_EOE
+ #include "fsm_eoe.h"
++#endif
+ #include "fsm_slave_config.h"
+ #include "fsm_slave_scan.h"
+ 
+@@ -68,13 +70,17 @@
+     ec_foe_request_t *foe_request; /**< FoE request to process. */
+     off_t foe_index; /**< Index to FoE write request data. */
+     ec_soe_request_t *soe_request; /**< SoE request to process. */
++#ifdef EC_EOE
+     ec_eoe_request_t *eoe_request; /**< SoE request to process. */
++#endif
+     ec_dict_request_t *dict_request; /**< Dictionary request to process. */
+ 
+     ec_fsm_coe_t fsm_coe; /**< CoE state machine. */
+     ec_fsm_foe_t fsm_foe; /**< FoE state machine. */
+     ec_fsm_soe_t fsm_soe; /**< SoE state machine. */
++#ifdef EC_EOE
+     ec_fsm_eoe_t fsm_eoe; /**< EoE state machine. */
++#endif
+     ec_fsm_pdo_t fsm_pdo; /**< PDO configuration state machine. */
+     ec_fsm_change_t fsm_change; /**< State change state machine */
+     ec_fsm_slave_scan_t fsm_slave_scan; /**< slave scan state machine */
+diff -r b53d093bc4ae master/ioctl.c
+--- master/ioctl.c	Thu Feb 01 11:00:00 2018 +1200
++++ master/ioctl.c	Tue Apr 30 00:28:38 2019 +0200
+@@ -1792,6 +1792,7 @@
+ 
+ /*****************************************************************************/
+ 
++#ifdef EC_EOE
+ /** Request EoE IP parameter setting.
+  *
+  * \return Zero on success, otherwise a negative error code.
+@@ -1872,6 +1873,7 @@
+ 
+     return req.state == EC_INT_REQUEST_SUCCESS ? 0 : -EIO;
+ }
++#endif
+ 
+ /*****************************************************************************/
+ 
+@@ -5351,6 +5353,7 @@
+         case EC_IOCTL_SLAVE_SOE_READ:
+             ret = ec_ioctl_slave_soe_read(master, arg);
+             break;
++#ifdef EC_EOE
+         case EC_IOCTL_SLAVE_EOE_IP_PARAM:
+             if (!ctx->writable) {
+                 ret = -EPERM;
+@@ -5358,6 +5361,7 @@
+             }
+             ret = ec_ioctl_slave_eoe_ip_param(master, arg);
+             break;
++#endif
+         case EC_IOCTL_SLAVE_SOE_WRITE:
+             if (!ctx->writable) {
+                 ret = -EPERM;
+diff -r b53d093bc4ae master/ioctl.h
+--- master/ioctl.h	Thu Feb 01 11:00:00 2018 +1200
++++ master/ioctl.h	Tue Apr 30 00:28:38 2019 +0200
+@@ -83,7 +83,9 @@
+ #define EC_IOCTL_SLAVE_FOE_WRITE       EC_IOW(0x15, ec_ioctl_slave_foe_t)
+ #define EC_IOCTL_SLAVE_SOE_READ       EC_IOWR(0x16, ec_ioctl_slave_soe_read_t)
+ #define EC_IOCTL_SLAVE_SOE_WRITE      EC_IOWR(0x17, ec_ioctl_slave_soe_write_t)
++#ifdef EC_EOE
+ #define EC_IOCTL_SLAVE_EOE_IP_PARAM    EC_IOW(0x18, ec_ioctl_slave_eoe_ip_t)
++#endif
+ #define EC_IOCTL_CONFIG               EC_IOWR(0x19, ec_ioctl_config_t)
+ #define EC_IOCTL_CONFIG_PDO           EC_IOWR(0x1a, ec_ioctl_config_pdo_t)
+ #define EC_IOCTL_CONFIG_PDO_ENTRY     EC_IOWR(0x1b, ec_ioctl_config_pdo_entry_t)
+@@ -650,6 +652,7 @@
+ #endif
+ #endif
+ 
++#ifdef EC_EOE
+ typedef struct {
+     // input
+     uint16_t slave_position;
+@@ -672,6 +675,7 @@
+ 	uint16_t result;
+ } ec_ioctl_slave_eoe_ip_t;
+ 
++#endif
+ /*****************************************************************************/
+ 
+ typedef struct {
+diff -r b53d093bc4ae tool/CommandIp.h
+--- tool/CommandIp.h	Thu Feb 01 11:00:00 2018 +1200
++++ tool/CommandIp.h	Tue Apr 30 00:28:38 2019 +0200
+@@ -27,6 +27,7 @@
+  *
+  ****************************************************************************/
+ 
++
+ #ifndef __COMMANDIP_H__
+ #define __COMMANDIP_H__
+ 
+diff -r b53d093bc4ae tool/Makefile.am
+--- tool/Makefile.am	Thu Feb 01 11:00:00 2018 +1200
++++ tool/Makefile.am	Tue Apr 30 00:28:38 2019 +0200
+@@ -50,7 +50,6 @@
+ 	CommandFoeRead.cpp \
+ 	CommandFoeWrite.cpp \
+ 	CommandGraph.cpp \
+-	CommandIp.cpp \
+ 	CommandMaster.cpp \
+ 	CommandPdos.cpp \
+ 	CommandRegRead.cpp \
+@@ -80,11 +79,13 @@
+ if ENABLE_EOE
+ ethercat_SOURCES += CommandEoe.cpp \
+ 	CommandEoeAddIf.cpp \
+-	CommandEoeDelIf.cpp
++	CommandEoeDelIf.cpp \
++	CommandIp.cpp
+ else
+ EXTRA_DIST += CommandEoe.cpp \
+ 	CommandEoeAddIf.cpp \
+-	CommandEoeDelIf.cpp
++	CommandEoeDelIf.cpp \
++	CommandIp.cpp
+ endif
+ 
+ noinst_HEADERS = \
+@@ -101,7 +102,6 @@
+ 	CommandFoeRead.h \
+ 	CommandFoeWrite.h \
+ 	CommandGraph.h \
+-	CommandIp.h \
+ 	CommandMaster.h \
+ 	CommandPdos.h \
+ 	CommandRegRead.h \
+@@ -130,11 +130,13 @@
+ if ENABLE_EOE
+ noinst_HEADERS += CommandEoe.h \
+ 	CommandEoeAddIf.h \
+-	CommandEoeDelIf.h
++	CommandEoeDelIf.h \
++	CommandIp.h
+ else
+ EXTRA_DIST += CommandEoe.h \
+ 	CommandEoeAddIf.h \
+-	CommandEoeDelIf.h
++	CommandEoeDelIf.h \
++	CommandIp.h
+ endif
+ 
+ REV = `if test -s $(top_srcdir)/revision; then \
+diff -r b53d093bc4ae tool/MasterDevice.cpp
+--- tool/MasterDevice.cpp	Thu Feb 01 11:00:00 2018 +1200
++++ tool/MasterDevice.cpp	Tue Apr 30 00:28:38 2019 +0200
+@@ -685,6 +685,7 @@
+ 
+ /****************************************************************************/
+ 
++#ifdef EC_EOE
+ void MasterDevice::setIpParam(ec_ioctl_slave_eoe_ip_t *data)
+ {
+     if (ioctl(fd, EC_IOCTL_SLAVE_EOE_IP_PARAM, data) < 0) {
+@@ -697,5 +698,6 @@
+         }
+     }
+ }
++#endif
+ 
+ /*****************************************************************************/
+diff -r b53d093bc4ae tool/MasterDevice.h
+--- tool/MasterDevice.h	Thu Feb 01 11:00:00 2018 +1200
++++ tool/MasterDevice.h	Tue Apr 30 00:28:38 2019 +0200
+@@ -93,7 +93,7 @@
+ };
+ 
+ /****************************************************************************/
+-
++#ifdef EC_EOE
+ class MasterDeviceEoeException:
+     public MasterDeviceException
+ {
+@@ -108,7 +108,7 @@
+             MasterDeviceException("EoE set IP parameter failed."),
+             result(result) {};
+ };
+-
++#endif
+ /****************************************************************************/
+ 
+ class MasterDevice
+@@ -167,8 +167,9 @@
+         void readSoe(ec_ioctl_slave_soe_read_t *);
+         void writeSoe(ec_ioctl_slave_soe_write_t *);
+         void dictUpload(ec_ioctl_slave_dict_upload_t *);
++#ifdef EC_EOE
+         void setIpParam(ec_ioctl_slave_eoe_ip_t *);
+-
++#endif
+         unsigned int getMasterCount() const {return masterCount;}
+ 
+     private:
+diff -r b53d093bc4ae tool/main.cpp
+--- tool/main.cpp	Thu Feb 01 11:00:00 2018 +1200
++++ tool/main.cpp	Tue Apr 30 00:28:38 2019 +0200
+@@ -48,11 +48,11 @@
+ #include "CommandEoe.h"
+ #include "CommandEoeAddIf.h"
+ #include "CommandEoeDelIf.h"
++#include "CommandIp.h"
+ #endif
+ #include "CommandFoeRead.h"
+ #include "CommandFoeWrite.h"
+ #include "CommandGraph.h"
+-#include "CommandIp.h"
+ #include "CommandMaster.h"
+ #include "CommandPdos.h"
+ #include "CommandRegRead.h"
+@@ -311,11 +311,11 @@
+     commandList.push_back(new CommandEoe());
+     commandList.push_back(new CommandEoeAddIf());
+     commandList.push_back(new CommandEoeDelIf());
++    commandList.push_back(new CommandIp());
+ #endif
+     commandList.push_back(new CommandFoeRead());
+     commandList.push_back(new CommandFoeWrite());
+     commandList.push_back(new CommandGraph());
+-    commandList.push_back(new CommandIp());
+     commandList.push_back(new CommandMaster());
+     commandList.push_back(new CommandPdos());
+     commandList.push_back(new CommandRegRead());

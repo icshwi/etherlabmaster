@@ -1,8 +1,9 @@
 VARS_EXCLUDES := $(.VARIABLES)
 
-include $(TOP)/configure/CONFIG_MODULE
 
+include $(TOP)/configure/CONFIG_MODULE
 include $(TOP)/configure/CONFIG_OPTIONS
+include $(TOP)/configure/CONFIG_PATCHSET
 
 ## It is not necessary to modify the following files in most case.
 ## Order is matter

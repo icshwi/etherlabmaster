@@ -57,10 +57,12 @@ modules: conf
 # always sudo is needed
 ## modules_install : EtherCAT Master Kernel Modules Installation
 modules_install:
-	$(QUIET) sudo -E bash -c '$(E3_MODULE_MAKE_CMDS) modules_install'
+	$(QUIET) $(SUDO2) '$(E3_MODULE_MAKE_CMDS) modules_install'
 
 modules_uninstall:
-	$(QUIET) sudo -E bash -c '$(E3_MODULE_MAKE_CMDS) modules_uninstall'	
+	$(QUIET) $(SUDO2) '$(E3_MODULE_MAKE_CMDS) modules_uninstall'	
+
+
 
 autoconf: conf
 	$(QUIET) $(E3_MODULE_MAKE_CMDS) autoconf
@@ -74,22 +76,22 @@ conf:
 .PHONY: dkms_add dkms_remove dkms_build dkms_install dkms_uninstall
 
 dkms_add: conf
-	$(QUIET) sudo install -d 755 /usr/src/$(E3_MODULE_NAME)-$(E3_MODULE_VERSION)
+	$(QUIET) $(SUDO) install -m 755 -d  /usr/src/$(E3_MODULE_NAME)-$(E3_MODULE_VERSION)
 	sudo cp -r $(TOP)/$(E3_MODULE_SRC_PATH)/* /usr/src/$(E3_MODULE_NAME)-$(E3_MODULE_VERSION)/
-	$(QUIET) sudo -E bash -c '$(E3_MODULE_MAKE_CMDS) dkms_add'
+	$(QUIET) $(SUDOBASH) '$(E3_MODULE_MAKE_CMDS) dkms_add'
 
 dkms_remove: conf
-	$(QUIET) sudo -E bash -c '$(E3_MODULE_MAKE_CMDS) dkms_remove'
+	$(QUIET) $(SUDOBASH) '$(E3_MODULE_MAKE_CMDS) dkms_remove'
 	sudo rm -rf /usr/src/$(E3_MODULE_NAME)-$(E3_MODULE_VERSION)/
 	     
 dkms_build:
-	$(QUIET) sudo -E bash -c '$(E3_MODULE_MAKE_CMDS) dkms_build'
-
+	$(QUIET) $(SUDOBASH) '$(E3_MODULE_MAKE_CMDS) dkms_build'
+	
 dkms_install:
-	$(QUIET) sudo -E bash -c '$(E3_MODULE_MAKE_CMDS) dkms_install'
+	$(QUIET) $(SUDOBASH) '$(E3_MODULE_MAKE_CMDS) dkms_install'
 
 dkms_uninstall:
-	$(QUIET) sudo -E bash -c '$(E3_MODULE_MAKE_CMDS) dkms_uninstall'
+	$(QUIET) $(SUDOBASH) '$(E3_MODULE_MAKE_CMDS) dkms_uninstall'
 
 
 
@@ -104,18 +106,19 @@ setup_clean:
 	$(QUIET) bash $(TOP)/scripts/etherlab_setup_clean.bash
 
 
-.PHONY: init deinit hg_clone hg_update_rev
+.PHONY: init deinit hg_update_rev
 
 ## Cloning the EtherCAT Master Source and Change it to the Specific Revision
-init: hg_clone hg_update_rev 
-	@echo ""
+init:
+	hg clone http://hg.code.sf.net/p/etherlabmaster/code $(E3_MODULE_SRC_PATH) -r $(E3_ETHERLAB_BRANCH)
+	$(QUIET)cd $(E3_MODULE_SRC_PATH) && hg update -r $(EPICS_MODULE_TAG)
+	$(QUIET)cd $(E3_MODULE_SRC_PATH) && hg id -nib
+	$(MAKE) patch
 
 ## Remove clone source files
 deinit:
 	rm -rf $(E3_MODULE_SRC_PATH)
 
-hg_clone:
-	hg clone http://hg.code.sf.net/p/etherlabmaster/code $(E3_MODULE_SRC_PATH) -r $(E3_ETHERLAB_BRANCH)
 	
 hg_update_rev:
 	$(QUIET)cd $(E3_MODULE_SRC_PATH) && hg update -r $(EPICS_MODULE_TAG)

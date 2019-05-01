@@ -1,5 +1,6 @@
 #
-#  Copyright (c) 2018 - Present  European Spallation Source ERIC
+#  Copyright (c) 2019         Jeong Han Lee 
+#  Copyright (c) 2018 - 2019  European Spallation Source ERIC
 #
 #  The program is free software: you can redistribute
 #  it and/or modify it under the terms of the GNU General Public License
@@ -17,8 +18,8 @@
 # 
 # Author  : Jeong Han Lee
 # email   : jeonghan.lee@gmail.com
-# Date    : Wednesday, July 25 23:31:31 CEST 2018
-# version : 0.0.1
+# Date    : Tuesday, April 30 02:20:36 CEST 2019
+# version : 0.0.2
 #
 
 DKMS:=/usr/sbin/dkms
@@ -48,7 +49,7 @@ modules:
 
 modules_install: 
 	$(MAKE) modules_install
-	depmod --quick
+	$(QUIET) depmod --quick
 
 dkms_build:
 	$(DKMS) build  -m $(E3_MODULE_NAME) -v $(E3_MODULE_VERSION) 
@@ -61,12 +62,12 @@ dkms_remove:
 
 
 dkms_install:
-	$(DKMS) install  -m $(E3_MODULE_NAME) -v $(E3_MODULE_VERSION)
-	depmod --quick
+	$(DKMS) install -m $(E3_MODULE_NAME) -v $(E3_MODULE_VERSION) --force
+	$(QUIET) depmod --quick
 
 dkms_uninstall:
 	$(DKMS) uninstall -m $(E3_MODULE_NAME) -v $(E3_MODULE_VERSION)
-	depmod --quick
+	$(QUIET) depmod --quick
 
 clean:
 	$(MAKE) clean
