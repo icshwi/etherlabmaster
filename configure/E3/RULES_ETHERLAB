@@ -106,14 +106,20 @@ setup_clean:
 	$(QUIET) bash $(TOP)/scripts/etherlab_setup_clean.bash
 
 
-.PHONY: init deinit
+.PHONY: init deinit hg_update_rev
 
 ## Cloning the EtherCAT Master Source and Change it to the Specific Revision
 init:
 	hg clone http://hg.code.sf.net/p/etherlabmaster/code $(E3_MODULE_SRC_PATH) -r $(E3_ETHERLAB_BRANCH)
-	cd $(E3_MODULE_SRC_PATH) && hg update -r $(EPICS_MODULE_TAG)
+	$(QUIET)cd $(E3_MODULE_SRC_PATH) && hg update -r $(EPICS_MODULE_TAG)
+	$(QUIET)cd $(E3_MODULE_SRC_PATH) && hg id -nib
 	$(MAKE) patch
 
 ## Remove clone source files
 deinit:
 	rm -rf $(E3_MODULE_SRC_PATH)
+
+	
+hg_update_rev:
+	$(QUIET)cd $(E3_MODULE_SRC_PATH) && hg update -r $(EPICS_MODULE_TAG)
+	$(QUIET)cd $(E3_MODULE_SRC_PATH) && hg id -nib

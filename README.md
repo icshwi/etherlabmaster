@@ -76,9 +76,13 @@ etherlabmaster (master)$ make setup_clean
 * Switch to Revison 9e65f7. We are using the following master revision number as the starting point  
 * Apply the Site Specific local patch files. See Ref [1].
 ```
-[9e65f7] (stable-1.5, tip) by Florian Pose 
-Fixed scheduler settings in dc_user example; use CLOCK_MONOTONIC.
-2018-02-13 16:16:01 
+# jhlee@hadron: etherlabmaster-code (master)$ hg heads
+# changeset:   2295:5f29e43487df
+# branch:      stable-1.5
+# tag:         tip
+# user:        Florian Pose
+# date:        Tue Jan 22 14:34:55 2019 +0100
+# summary:     Added extern "C" for floating-point functions.
 ```
 ### make build
 * Ethercat program compilation
@@ -101,6 +105,7 @@ Fixed scheduler settings in dc_user example; use CLOCK_MONOTONIC.
 * Setup the dkms systemd service
 * Setup the ethercat systemd service
 * Put the UDEV rule to allow an user to access the ethercat master port
+* Put the UDEV rule to do *unmanaged*able on the ethercat master port by NetworkManager
 * Create the symbolic link for the ethercat executable command
 * Put the lib path in the global ld configuration path
 

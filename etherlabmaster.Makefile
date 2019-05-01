@@ -26,38 +26,36 @@ DKMS:=/usr/sbin/dkms
 
 
 autoconf:
-	touch ChangeLog
-	autoreconf -i
+	$(QUIET) touch ChangeLog
+	$(QUIET) autoreconf -i
 	./configure $(E3_ETHERLAB_CONF_OPTIONS) --prefix=$(E3_ETHERLAB_INSTALL_LOCATION)
 
 
 build: 
-	make
+	$(MAKE)
 
 
 install: build
-	make install
+	$(MAKE) install
 
 
 uninstall:
-	make uninstall
-
+	$(MAKE) uninstall
 
 
 modules: 
-	make modules
+	$(MAKE) modules
 
 
 modules_install: 
-	make modules_install
+	$(MAKE) modules_install
 	$(QUIET) depmod --quick
 
 dkms_build:
-	$(DKMS) build -m $(E3_MODULE_NAME) -v $(E3_MODULE_VERSION)
-
+	$(DKMS) build  -m $(E3_MODULE_NAME) -v $(E3_MODULE_VERSION) 
 
 dkms_add:
-	$(DKMS) add -m $(E3_MODULE_NAME) -v $(E3_MODULE_VERSION)
+	$(DKMS) add    -m $(E3_MODULE_NAME) -v $(E3_MODULE_VERSION)
 
 dkms_remove:
 	$(DKMS) remove -m $(E3_MODULE_NAME) -v $(E3_MODULE_VERSION) --all
@@ -72,7 +70,7 @@ dkms_uninstall:
 	$(QUIET) depmod --quick
 
 clean:
-	make clean
+	$(MAKE) clean
 
 
 .PHONY: autoconf build install uninstall modules modules_install modules_uninstall clean
