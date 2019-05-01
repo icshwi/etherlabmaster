@@ -1,22 +1,17 @@
 #
 EPICS_MODULE_NAME:=etherlabmaster
 
-# We are using the following master revision number as the starting point
-#  [9e65f7] (stable-1.5, tip) by Florian Pose
-# Fixed scheduler settings in dc_user example; use CLOCK_MONOTONIC.
-#	2018-02-13 16:16:01 
-EPICS_MODULE_TAG:=9e65f7
+# jhlee@hadron: etherlabmaster-code (master)$ hg heads
+# changeset:   2295:5f29e43487df
+# branch:      stable-1.5
+# tag:         tip
+# user:        Florian Pose
+# date:        Tue Jan 22 14:34:55 2019 +0100
+# summary:     Added extern "C" for floating-point functions.
+EPICS_MODULE_TAG:=5f29e43487df
+#EPICS_MODULE_TAG:=9e65f7
 
 E3_ETHERLAB_INSTALL_LOCATION:=/opt/etherlab
-
-# 
-E3_ETHERLAB_CONF_OPTIONS:=--disable-8139too
-#
-E3_ETHERLAB_CONF_OPTIONS+=--enable-generic
-#
-E3_ETHERLAB_CONF_OPTIONS+=--enable-sii-assign=yes
-#
-E3_ETHERLAB_CONF_OPTIONS+=--enable-eoe=no
 
 #
 # We set this version as 1.5.2 as ESS

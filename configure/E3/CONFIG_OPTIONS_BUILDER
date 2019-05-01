@@ -1,0 +1,131 @@
+
+ifeq ($(WITH_DEV_GENERIC),YES)
+E3_ETHERLAB_CONF_OPTIONS+=--enable-generic
+else
+E3_ETHERLAB_CONF_OPTIONS+=--disable-generic
+endif
+
+ifeq ($(WITH_DEV_8139TOO),YES)
+E3_ETHERLAB_CONF_OPTIONS+=--enable-8139too
+else
+E3_ETHERLAB_CONF_OPTIONS+=--disable-8139too
+endif
+
+
+
+ifeq ($(WITH_DEV_E100),YES)
+E3_ETHERLAB_CONF_OPTIONS+=--enable-e100
+else
+E3_ETHERLAB_CONF_OPTIONS+=--disable-e100
+endif
+
+
+ifeq ($(WITH_DEV_E1000),YES)
+E3_ETHERLAB_CONF_OPTIONS+=--enable-e1000
+else
+E3_ETHERLAB_CONF_OPTIONS+=--disable-e1000
+endif
+
+
+ifeq ($(WITH_DEV_E1000E),YES)
+E3_ETHERLAB_CONF_OPTIONS+=--enable-e1000e
+else
+E3_ETHERLAB_CONF_OPTIONS+=--disable-e1000e
+endif
+
+
+ifeq ($(WITH_DEV_IGB),YES)
+E3_ETHERLAB_CONF_OPTIONS+=--enable-igb
+else
+E3_ETHERLAB_CONF_OPTIONS+=--disable-igb
+endif
+
+
+ifeq ($(WITH_DEV_R8169),YES)
+E3_ETHERLAB_CONF_OPTIONS+=--enable-r8169
+else
+E3_ETHERLAB_CONF_OPTIONS+=--disable-r8169
+endif
+
+
+ifeq ($(WITH_DEV_CCAT),YES)
+E3_ETHERLAB_CONF_OPTIONS+=--enable-ccat
+else
+E3_ETHERLAB_CONF_OPTIONS+=--disable-ccat
+endif
+
+
+
+ifeq ($(ENABLE_STATIC),YES)
+E3_ETHERLAB_CONF_OPTIONS+=--enable-static=yes
+else
+E3_ETHERLAB_CONF_OPTIONS+=--enable-static=no
+endif
+
+
+ifeq ($(ENABLE_SHARED),YES)
+E3_ETHERLAB_CONF_OPTIONS+=--enable-shared=yes
+else
+E3_ETHERLAB_CONF_OPTIONS+=--enable-shared=no
+endif
+
+
+
+ifeq ($(ENABLE_EOE),YES)
+E3_ETHERLAB_CONF_OPTIONS+=--enable-eoe=yes
+else
+E3_ETHERLAB_CONF_OPTIONS+=--enable-eoe=no
+endif
+
+
+ifeq ($(ENABLE_CYCLES),YES)
+E3_ETHERLAB_CONF_OPTIONS+=--enable-cycles=yes
+else
+E3_ETHERLAB_CONF_OPTIONS+=--enable-cycles=no
+endif
+
+
+ifeq ($(ENABLE_HRTIMER),YES)
+E3_ETHERLAB_CONF_OPTIONS+=--enable-hrtimer=yes
+else
+E3_ETHERLAB_CONF_OPTIONS+=--enable-hrtimer=no
+endif
+
+
+
+ifeq ($(ENABLE_REGALIAS),YES)
+E3_ETHERLAB_CONF_OPTIONS+=--enable-regalias=yes
+else
+E3_ETHERLAB_CONF_OPTIONS+=--enable-regalias=no
+endif
+
+
+
+ifeq ($(ENABLE_TOOL),YES)
+E3_ETHERLAB_CONF_OPTIONS+=--enable-tool=yes
+else
+E3_ETHERLAB_CONF_OPTIONS+=--enable-tool=no
+endif
+
+
+
+ifeq ($(ENABLE_USERLIB),YES)
+E3_ETHERLAB_CONF_OPTIONS+=--enable-userlib=yes
+else
+E3_ETHERLAB_CONF_OPTIONS+=--enable-userlib=no
+endif
+
+
+ifeq ($(ENABLE_SII_ASSIGN),YES)
+E3_ETHERLAB_CONF_OPTIONS+=--enable-sii-assign=yes
+else
+E3_ETHERLAB_CONF_OPTIONS+=--enable-sii-assign=no
+endif
+
+ifeq ($(ENABLE_RT_SYSLOG),YES)
+E3_ETHERLAB_CONF_OPTIONS+=--enable-rt-syslog=yes
+else
+E3_ETHERLAB_CONF_OPTIONS+=--enable-rt-syslog=no
+endif
+
+

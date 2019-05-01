@@ -76,9 +76,13 @@ etherlabmaster (master)$ make setup_clean
 * Download the main etherlabmaster-code from sf.net
 * Switch to Revison 9e65f7. We are using the following master revision number as the starting point  
 ```
-[9e65f7] (stable-1.5, tip) by Florian Pose 
-Fixed scheduler settings in dc_user example; use CLOCK_MONOTONIC.
-2018-02-13 16:16:01 
+# jhlee@hadron: etherlabmaster-code (master)$ hg heads
+# changeset:   2295:5f29e43487df
+# branch:      stable-1.5
+# tag:         tip
+# user:        Florian Pose
+# date:        Tue Jan 22 14:34:55 2019 +0100
+# summary:     Added extern "C" for floating-point functions.
 ```
 ### make patch
 * We would like to keep ethercat.conf file within $PREFIX/etc path.  [See the patch file 1](./patch/Site/use_prefix_for_ethercat_conf_path.p0.patch)
