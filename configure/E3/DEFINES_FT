@@ -45,7 +45,6 @@ done
 endef
 
 
-
 ifndef VERBOSE
   QUIET := @
 endif

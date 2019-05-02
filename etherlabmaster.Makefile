@@ -32,27 +32,28 @@ autoconf:
 
 
 build: 
-	$(MAKE)
+	make
 
 
 install: build
-	$(MAKE) install
+	make install
 
 
 uninstall:
-	$(MAKE) uninstall
+	make uninstall
 
 
 modules: 
-	$(MAKE) modules
+	make modules
 
 
 modules_install: 
-	$(MAKE) modules_install
+	make modules_install
 	$(QUIET) depmod --quick
 
 dkms_build:
-	$(DKMS) build  -m $(E3_MODULE_NAME) -v $(E3_MODULE_VERSION) 
+	$(DKMS) build  -m $(E3_MODULE_NAME) -v $(E3_MODULE_VERSION)
+#	$(DKMS) build  -m $(E3_MODULE_NAME) -v $(E3_MODULE_VERSION)  -j 1
 
 dkms_add:
 	$(DKMS) add    -m $(E3_MODULE_NAME) -v $(E3_MODULE_VERSION)
@@ -70,8 +71,8 @@ dkms_uninstall:
 	$(QUIET) depmod --quick
 
 clean:
-	$(MAKE) clean
+	make clean
 
 
-.PHONY: autoconf build install uninstall modules modules_install modules_uninstall clean
+.PHONY: autoconf build install uninstall modules modules_install modules_uninstall clean dkms_build dkms_add dkms_remove dkms_install dkms_uninstall
 

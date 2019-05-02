@@ -1,0 +1,4 @@
+
+BUILT_MODULE_NAME[__NUMBER__]="devices/__NAME__"
+DEST_MODULE_NAME[__NUMBER__]="__NAME__"
+DEST_MODULE_LOCATION[__NUMBER__]="/updates/dkms"

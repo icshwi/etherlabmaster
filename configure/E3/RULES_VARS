@@ -25,13 +25,13 @@ header:
 patchsetvars: vars
 
 
-showopts: optsheader showdevopts showenableppts
+showopts: optsheader showdevopts showenableopts
 
 showdevopts:
 	$(foreach v, $(DEV_OPTS_VARS), $(info $(v) = $($(v)))) @#noop
 	$(QUIET)echo ""
 
-showenableppts:
+showenableopts:
 	$(foreach v, $(ENABLE_OPTS_VARS), $(info $(v) = $($(v)))) @#noop
 	$(QUIET)echo ""
 

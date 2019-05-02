@@ -2,6 +2,7 @@
 
 include $(TOP)/configure/E3/DEFINES_FT
 include $(TOP)/configure/E3/RULES_PATCH
+include $(TOP)/configure/E3/RULES_DKMS_BUILDER
 include $(TOP)/configure/E3/RULES_ETHERLAB
 include $(TOP)/configure/E3/RULES_PATCHSET
 

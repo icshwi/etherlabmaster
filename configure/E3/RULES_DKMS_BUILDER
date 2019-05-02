@@ -1,0 +1,35 @@
+
+
+map = $(foreach a,$2,$(call $1,$a))
+is-yes = $(if $(filter YES,$(value $1)),$1)
+variable-yes = $(call map,is-yes,$1)
+
+WITH_VARIABLES=$(sort $(filter-out $(VARS_EXCLUDES) VARS_EXCLUDES,$(.VARIABLES)))
+DEV_OPTS_VARS=$(filter WITH_DEV_%, $(WITH_VARIABLES))
+YES_VARS=$(strip $(call variable-yes,$(DEV_OPTS_VARS)))
+NYES=$(words $(YES_VARS))
+
+
+dkms_vars:
+	@echo "$(NYES) : $(YES_VARS)"
+
+yesconf:
+	$(QUIET) rm -rf $(TOP)/dkms/*.local
+	$(QUIET) sed -e "s:__VERSION__:$(E3_MODULE_VERSION):g" < $(TOP)/dkms/dkms_dev_0.in > $(TOP)/dkms/dkms_dev_0.local
+	@init_drv_num=1;\
+	for drv in $(YES_VARS); do\
+	    driver_name=$$(echo $$drv | sed -e "s:WITH_DEV_::g" | sed -e 's/\(.*\)/\L\1/');\
+	    driver_name="ec_$$driver_name";\
+	    init_drv_num=$$(($$init_drv_num+1));\
+#	    echo "$$init_drv_num $$drv $$driver_name";\
+	    sed -e "s:__NAME__:$$driver_name:g" -e "s:__NUMBER__:$$init_drv_num:g" < $(TOP)/dkms/dkms_dev_N.in > $(TOP)/dkms/dkms_dev_$$init_drv_num.local;\
+	done;
+	
+
+dkmsconf: yesconf
+	cat $(sort $(wildcard $(TOP)/dkms/*.local)) > $(E3_MODULE_SRC_PATH)/dkms.conf
+	$(QUIET)echo "\nREMAKE_INITRD=yes" >>$(E3_MODULE_SRC_PATH)/dkms.conf
+
+
+
+.PHONY: dkms_vars yesconf 
