@@ -75,7 +75,7 @@ conf: dkmsconf
 .PHONY: dkms_add dkms_remove dkms_build dkms_install dkms_uninstall
 
 dkms_add: autoconf
-	$(QUIET) $(SUDO) install -m 755 -d  /usr/src/$(E3_MODULE_NAME)-$(E3_MODULE_VERSION)
+	$(QUIET) $(SUDO2) install -m 755 -d  /usr/src/$(E3_MODULE_NAME)-$(E3_MODULE_VERSION)
 	sudo cp -r $(TOP)/$(E3_MODULE_SRC_PATH)/* /usr/src/$(E3_MODULE_NAME)-$(E3_MODULE_VERSION)/
 	$(QUIET) $(SUDOBASH) '$(E3_MODULE_MAKE_CMDS) dkms_add'
 

@@ -50,3 +50,9 @@ patchset_patchrevert:
 
 
 VARS_EXCLUDES+=HG_CFG
+VARS_EXCLUDES+=patchset_patch
+VARS_EXCLUDES+=patchset_patchrevert
+VARS_EXCLUDES+=patchset_hgcfg
+VARS_EXCLUDES+=patchset
+VARS_EXCLUDES+=orig_patchset
+

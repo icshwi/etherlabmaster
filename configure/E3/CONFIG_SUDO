@@ -9,13 +9,13 @@ SUDO_CMD := $(shell which sudo)
 #
 ifeq "$(SUDO_INFO)" "1"
 ifneq (,$(findstring devtoolset,$(SUDO_CMD)))
-SUDO = $(SUDO_CMD)
+SUDOE = $(SUDO_CMD)
 else
-SUDO = $(SUDO_CMD) -E
+SUDOE = $(SUDO_CMD) -E
 endif
-SUDOBASH := $(SUDO) bash -c
+SUDOBASH := $(SUDOE) bash -c
 else
-SUDO :=
+SUDOE :=
 SUDOBASH = bash -c
 endif
 

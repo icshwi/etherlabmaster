@@ -28,8 +28,17 @@ yesconf:
 
 dkmsconf: yesconf
 	cat $(sort $(wildcard $(TOP)/dkms/*.local)) > $(E3_MODULE_SRC_PATH)/dkms.conf
-	$(QUIET)echo "\nREMAKE_INITRD=yes" >>$(E3_MODULE_SRC_PATH)/dkms.conf
+	$(QUIET)echo ""  >>$(E3_MODULE_SRC_PATH)/dkms.conf
+	$(QUIET)echo "REMAKE_INITRD=yes" >>$(E3_MODULE_SRC_PATH)/dkms.conf
 
 
 
-.PHONY: dkms_vars yesconf 
+.PHONY: dkms_vars yesconf
+
+VARS_EXCLUDES+=map
+VARS_EXCLUDES+=is-yes
+VARS_EXCLUDES+=variable-yes
+VARS_EXCLUDES+=WITH_VARIABLES
+VARS_EXCLUDES+=DEV_OPTS_VARS
+VARS_EXCLUDES+=YES_VARS
+VARS_EXCLUDES+=NYES

@@ -1,6 +1,6 @@
 # Variables should be transferred to module_name.makefile
 
-EXPORT_VARS+=SUDO
+EXPORT_VARS+=SUDOE
 EXPORT_VARS+=SUDOBASH
 EXPORT_VARS+=$(filter E3_%,$(.VARIABLES))
 
