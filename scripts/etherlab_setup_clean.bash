@@ -179,6 +179,24 @@ function clean_put_udev_rule
 }
 
 
+# arg1 : device name
+# arg2 : target_rootfs, if exists
+function clean_udev_rule_for_unmanaged
+{
+    local target_rootfs=${1}; shift;
+    local udev_rules_dir="${target_rootfs}/etc/udev/rules.d"
+    local target="";
+
+    target="${udev_rules_dir}/00-unmanaged-device-by-nm.rules";
+
+    if [[ $(checkIfFile "${target}") -eq "EXIST" ]]; then
+	printf ">>> Clean the udev rule :%s.\n" "$target";
+	printf "    "
+	${SUDO_CMD} rm -rf ${target}
+    fi
+}
+
+
 function reload_trigger_udev_rule
 {
 
@@ -237,6 +255,8 @@ ${SUDO_CMD} -v
 clean_setup_dkms_systemd
 clean_setup_systemd
 clean_put_udev_rule "${ECAT_KMOD_NAME}"
+clean_udev_rule_for_unmanaged;
+
 reload_trigger_udev_rule
 
 CLEAN_TARGET=/usr/bin/ethercat

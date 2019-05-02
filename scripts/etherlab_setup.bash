@@ -43,6 +43,7 @@ if [ -r ${SC_TOP}/../ethercatmaster.local ]; then
     printf "    will be overriden with ETHERCAT_MASTER0 = %s\n\n" "${ETHERCAT_MASTER0}"
     
 fi
+. ${SC_TOP}/device_modules.conf
 set +a
 
 ECAT_DKMS_SYSTEMD=dkms.service
@@ -55,7 +56,6 @@ SD_UNIT_PATH_CENTOS=/usr/lib/systemd/system
 
 ECAT_KMOD_NAME="ethercat"
 ECAT_KMOD_MASTER_NAME="master"
-ECAT_KMOD_GENERIC_NAME="generic"
 
 KMOD_PERMISSON="666"
 
@@ -101,6 +101,24 @@ function find_dist
 }
 
 
+function get_list_from_file
+{
+    local empty_string="";
+    declare -a entry=();
+ 
+    while IFS= read -r line_data; do
+	if [ "$line_data" ]; then
+	    # Skip command #
+	    [[ "$line_data" =~ ^#.*$ ]] && continue
+	    entry[i]="${line_data}"
+	    ((++i))
+	fi
+    done < $1
+ 
+    echo ${entry[@]}
+}
+
+
 function get_macaddr
 {
     local dev=${1};
@@ -129,16 +147,15 @@ function activate_ethercat_master_network
 function setup_systemd
 {
     mac_address=$(get_macaddr ${ETHERCAT_MASTER0});
-    
-
+ 
     if [[ $(checkIfVar "${mac_address}") -eq "$EXIST" ]]; then
-
   
 	printf ">>> Set up EtherCAT Master ... \n";
 	printf "    %s : %s\n" "${ETHERCAT_MASTER0}" "${mac_address}"
+
 	
-	m4 -D_MASTER0_DEVICE="${mac_address}" -D_DEVICE_MODULES="${ECAT_KMOD_GENERIC_NAME}" ${SC_TOP}/ethercat.conf.m4 > ${SC_TOP}/ethercat.conf_temp
-	
+	m4 -D_MASTER0_DEVICE="${mac_address}" -D_DEVICE_MODULES="${DEVICE_MODULES}" ${SC_TOP}/ethercat.conf.m4 > ${SC_TOP}/ethercat.conf_temp
+
 	${SUDO_CMD} install -m 644 ${SC_TOP}/ethercat.conf_temp ${ETHERCAT_CONFIG}
 	rm ${SC_TOP}/ethercat.conf_temp
 
@@ -328,7 +345,7 @@ esac
 ${SUDO_CMD} -v
 
 ## Activate the selected Ethernet Port for EtherCAT connection
-activate_ethercat_master_network
+#activate_ethercat_master_network
 
 
 # Setup Systemd for the DKMS autoinstall

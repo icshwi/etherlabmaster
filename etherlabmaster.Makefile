@@ -27,7 +27,7 @@ DKMS:=/usr/sbin/dkms
 
 autoconf:
 	$(QUIET) touch ChangeLog
-	$(QUIET) autoreconf -i
+	$(QUIET) autoreconf --force --install -v
 	./configure $(E3_ETHERLAB_CONF_OPTIONS) --prefix=$(E3_ETHERLAB_INSTALL_LOCATION)
 
 

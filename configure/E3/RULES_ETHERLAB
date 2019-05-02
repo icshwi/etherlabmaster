@@ -68,7 +68,7 @@ autoconf: conf
 	$(QUIET) $(E3_MODULE_MAKE_CMDS) autoconf
 
 
-conf: dkmsconf
+conf:
 	$(QUIET) install -m 644 $(TOP)/$(E3_MODULE_MAKEFILE)  $(E3_MODULE_SRC_PATH)/
 
 
@@ -76,12 +76,12 @@ conf: dkmsconf
 
 dkms_add: autoconf
 	$(QUIET) $(SUDO2) install -m 755 -d  /usr/src/$(E3_MODULE_NAME)-$(E3_MODULE_VERSION)
-	sudo cp -r $(TOP)/$(E3_MODULE_SRC_PATH)/* /usr/src/$(E3_MODULE_NAME)-$(E3_MODULE_VERSION)/
+	$(SUDO2) cp -r $(TOP)/$(E3_MODULE_SRC_PATH)/* /usr/src/$(E3_MODULE_NAME)-$(E3_MODULE_VERSION)/
 	$(QUIET) $(SUDOBASH) '$(E3_MODULE_MAKE_CMDS) dkms_add'
 
 dkms_remove: conf
 	$(QUIET) $(SUDOBASH) '$(E3_MODULE_MAKE_CMDS) dkms_remove'
-	sudo rm -rf /usr/src/$(E3_MODULE_NAME)-$(E3_MODULE_VERSION)/
+	$(SUDO2) rm -rf /usr/src/$(E3_MODULE_NAME)-$(E3_MODULE_VERSION)/
 	     
 dkms_build:
 	$(QUIET) $(SUDOBASH) '$(E3_MODULE_MAKE_CMDS) dkms_build'
