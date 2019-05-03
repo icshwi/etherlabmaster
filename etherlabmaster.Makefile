@@ -46,10 +46,17 @@ uninstall:
 modules: 
 	make modules
 
+modules_clean: 
+	make modules clean
 
 modules_install: 
-	make modules_install
-	$(QUIET) depmod --quick
+	make modules install
+	$(QUIET) depmod -a
+
+modules_uninstall: 
+	make modules uninstall
+	$(QUIET) depmod -a
+
 
 dkms_build:
 	$(DKMS) build -m $(E3_MODULE_NAME) -v $(E3_MODULE_VERSION) --verbose
@@ -63,11 +70,11 @@ dkms_remove:
 
 dkms_install:
 	$(DKMS) install -m $(E3_MODULE_NAME) -v $(E3_MODULE_VERSION) --force
-	$(QUIET) depmod --quick
+	$(QUIET) depmod -a
 
 dkms_uninstall:
 	$(DKMS) uninstall -m $(E3_MODULE_NAME) -v $(E3_MODULE_VERSION)
-	$(QUIET) depmod --quick
+	$(QUIET) depmod -a
 
 clean:
 	make clean

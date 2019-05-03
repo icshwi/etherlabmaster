@@ -54,6 +54,9 @@ distclean: clean
 modules: conf
 	$(QUIET) $(E3_MODULE_MAKE_CMDS) modules
 
+modules_clean:
+	$(QUIET)  $(SUDO2) '$(E3_MODULE_MAKE_CMDS) modules clean'
+
 # always sudo is needed
 ## modules_install : EtherCAT Master Kernel Modules Installation
 modules_install:
@@ -61,6 +64,8 @@ modules_install:
 
 modules_uninstall:
 	$(QUIET) $(SUDO2) '$(E3_MODULE_MAKE_CMDS) modules_uninstall'	
+
+
 
 
 ## Autoconf on E3_MODULE_SRC_PATH
