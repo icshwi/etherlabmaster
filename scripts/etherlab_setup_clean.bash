@@ -190,7 +190,7 @@ function clean_udev_rule_for_unmanaged
     target="${udev_rules_dir}/00-unmanaged-device-by-nm.rules";
 
     if [[ $(checkIfFile "${target}") -eq "EXIST" ]]; then
-	printf ">>> Clean the udev rule :%s.\n" "$target";
+	printf "\n>>> Clean the udev rule :%s.\n" "$target";
 	printf "    "
 	${SUDO_CMD} rm -rf ${target}
     fi

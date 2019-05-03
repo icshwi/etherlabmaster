@@ -19,8 +19,8 @@ dkms_vars:
 
 yesconf:
 	$(QUIET) rm -rf $(TOP)/dkms/*.local  $(TOP)/scripts/*.local
-	$(QUIET) sed -e "s:__VERSION__:$(E3_MODULE_VERSION):g" < $(TOP)/dkms/dkms_dev_0.in > $(TOP)/dkms/dkms_dev_0.local
-	@init_drv_num=1;\
+	$(QUIET) sed -e "s:__VERSION__:$(E3_MODULE_VERSION):g" < $(TOP)/dkms/dkmsDev0.in > $(TOP)/dkms/dkmsDev0.local
+	@init_drv_num=0;\
 	device_modules="";\
 	for drv in $(YES_VARS); do\
 	    driver_name=$$(echo $$drv | sed -e "s:WITH_DEV_::g" | sed -e 's/\(.*\)/\L\1/');\
@@ -28,7 +28,7 @@ yesconf:
 	    driver_name="ec_$$driver_name";\
 	    init_drv_num=$$(($$init_drv_num+1));\
 #	    echo "$$init_drv_num $$drv $$driver_name";\
-	    sed -e "s:__NAME__:$$driver_name:g" -e "s:__NUMBER__:$$init_drv_num:g" < $(TOP)/dkms/dkms_dev_N.in > $(TOP)/dkms/dkms_dev_$$init_drv_num.local;\
+	    sed -e "s:__NAME__:$$driver_name:g" -e "s:__NUMBER__:$$init_drv_num:g" < $(TOP)/dkms/dkmsDevN.in > $(TOP)/dkms/dkmsDev$$init_drv_num.local;\
 	done;\
 	echo "DEVICE_MODULES=\"$${device_modules%?}\"" > $(TOP)/scripts/device_modules.conf
 
@@ -36,7 +36,7 @@ yesconf:
 dkmsconf: yesconf
 	cat $(sort $(wildcard $(TOP)/dkms/*.local)) > $(E3_MODULE_SRC_PATH)/dkms.conf
 	$(QUIET)echo ""  >>$(E3_MODULE_SRC_PATH)/dkms.conf
-	$(QUIET)echo "REMAKE_INITRD=yes" >>$(E3_MODULE_SRC_PATH)/dkms.conf
+	#$(QUIET)echo "REMAKE_INITRD=yes" >>$(E3_MODULE_SRC_PATH)/dkms.conf
 
 
 

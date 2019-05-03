@@ -74,17 +74,19 @@ conf:
 
 .PHONY: dkms_add dkms_remove dkms_build dkms_install dkms_uninstall
 
-dkms_add: autoconf
-	$(QUIET) $(SUDO2) install -m 755 -d  /usr/src/$(E3_MODULE_NAME)-$(E3_MODULE_VERSION)
-	$(SUDO2) cp -r $(TOP)/$(E3_MODULE_SRC_PATH)/* /usr/src/$(E3_MODULE_NAME)-$(E3_MODULE_VERSION)/
+dkms_add:  dkmsconf conf
+	$(QUIET) $(SUDO2) 'install -m 755 -d  /usr/src/$(E3_MODULE_NAME)-$(E3_MODULE_VERSION)'
+	$(QUIET) $(SUDO2) 'cp -r $(TOP)/$(E3_MODULE_SRC_PATH)/* /usr/src/$(E3_MODULE_NAME)-$(E3_MODULE_VERSION)/'
 	$(QUIET) $(SUDOBASH) '$(E3_MODULE_MAKE_CMDS) dkms_add'
 
 dkms_remove: conf
 	$(QUIET) $(SUDOBASH) '$(E3_MODULE_MAKE_CMDS) dkms_remove'
-	$(SUDO2) rm -rf /usr/src/$(E3_MODULE_NAME)-$(E3_MODULE_VERSION)/
+ifneq ($(wildcard /usr/src/$(E3_MODULE_NAME)-$(E3_MODULE_VERSION)/.*),)
+	$(QUIET) $(SUDO2) 'rm -rf /usr/src/$(E3_MODULE_NAME)-$(E3_MODULE_VERSION)/'
+endif
 	     
 dkms_build:
-	$(QUIET) $(SUDOBASH) '$(E3_MODULE_MAKE_CMDS) dkms_build'
+	$(QUIET) $(SUDO2) '$(E3_MODULE_MAKE_CMDS) dkms_build'
 	
 dkms_install:
 	$(QUIET) $(SUDOBASH) '$(E3_MODULE_MAKE_CMDS) dkms_install'
@@ -116,8 +118,9 @@ init:
 
 ## Remove clone source files
 deinit:
+ifneq ($(wildcard $(E3_MODULE_SRC_PATH)/.*),)
 	rm -rf $(E3_MODULE_SRC_PATH)
-
+endif
 	
 hg_update_rev:
 	$(QUIET)cd $(E3_MODULE_SRC_PATH) && hg update -r $(EPICS_MODULE_TAG)

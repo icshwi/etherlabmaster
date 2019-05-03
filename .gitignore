@@ -12,3 +12,5 @@ core.*
 .cvsignore
 *_old/
 etherlabmaster-code
+device_modules.conf
+

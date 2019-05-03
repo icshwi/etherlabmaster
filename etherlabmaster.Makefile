@@ -52,11 +52,10 @@ modules_install:
 	$(QUIET) depmod --quick
 
 dkms_build:
-	$(DKMS) build  -m $(E3_MODULE_NAME) -v $(E3_MODULE_VERSION)
-#	$(DKMS) build  -m $(E3_MODULE_NAME) -v $(E3_MODULE_VERSION)  -j 1
+	$(DKMS) build -m $(E3_MODULE_NAME) -v $(E3_MODULE_VERSION) --verbose
 
 dkms_add:
-	$(DKMS) add    -m $(E3_MODULE_NAME) -v $(E3_MODULE_VERSION)
+	$(DKMS) add -m $(E3_MODULE_NAME) -v $(E3_MODULE_VERSION)
 
 dkms_remove:
 	$(DKMS) remove -m $(E3_MODULE_NAME) -v $(E3_MODULE_VERSION) --all
@@ -75,4 +74,5 @@ clean:
 
 
 .PHONY: autoconf build install uninstall modules modules_install modules_uninstall clean dkms_build dkms_add dkms_remove dkms_install dkms_uninstall
+
 
