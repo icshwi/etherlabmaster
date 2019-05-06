@@ -18,12 +18,12 @@
 # 
 # Author  : Jeong Han Lee
 # email   : jeonghan.lee@gmail.com
-# Date    : Tuesday, April 30 02:20:36 CEST 2019
-# version : 0.0.2
+# Date    : Monday, May  6 21:57:44 CEST 2019
+# version : 0.0.3
 #
 
-DKMS:=/usr/sbin/dkms
-
+#DKMS:=/usr/sbin/dkms
+#DKMS:=/home/jhlee/private_gitsrc/dkms
 
 autoconf:
 	$(QUIET) touch ChangeLog
@@ -59,7 +59,8 @@ modules_uninstall:
 
 
 dkms_build:
-	$(DKMS) build -m $(E3_MODULE_NAME) -v $(E3_MODULE_VERSION) --verbose
+	$(DKMS) build -m $(E3_MODULE_NAME) -v $(E3_MODULE_VERSION)
+#	$(DKMS) build -m $(E3_MODULE_NAME) -v $(E3_MODULE_VERSION) --verbose
 
 dkms_add:
 	$(DKMS) add -m $(E3_MODULE_NAME) -v $(E3_MODULE_VERSION)

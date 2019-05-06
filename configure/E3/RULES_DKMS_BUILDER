@@ -25,18 +25,22 @@ yesconf:
 	for drv in $(YES_VARS); do\
 	    driver_name=$$(echo $$drv | sed -e "s:WITH_DEV_::g" | sed -e 's/\(.*\)/\L\1/');\
 	    device_modules="$$driver_name $$device_modules";\
-	    driver_name="ec_$$driver_name";\
+	    driver_name="$$driver_name";\
 	    init_drv_num=$$(($$init_drv_num+1));\
 #	    echo "$$init_drv_num $$drv $$driver_name";\
-	    sed -e "s:__NAME__:$$driver_name:g" -e "s:__NUMBER__:$$init_drv_num:g" < $(TOP)/dkms/dkmsDevN.in > $(TOP)/dkms/dkmsDev$$init_drv_num.local;\
+	    if [ "$$driver_name" = "generic" ]; then\
+	      sed -e "s:__NUMBER__:$$init_drv_num:g" < $(TOP)/dkms/dkmsDevGeneric.in > $(TOP)/dkms/dkmsDev$$init_drv_num.local;\
+	    else\
+	      sed -e "s:__NAME__:$$driver_name:g" -e "s:__NUMBER__:$$init_drv_num:g" < $(TOP)/dkms/dkmsDevN.in > $(TOP)/dkms/dkmsDev$$init_drv_num.local;\
+	    fi;\
 	done;\
 	echo "DEVICE_MODULES=\"$${device_modules%?}\"" > $(TOP)/scripts/device_modules.conf
 
 
 dkmsconf: yesconf
-	cat $(sort $(wildcard $(TOP)/dkms/*.local)) > $(E3_MODULE_SRC_PATH)/dkms.conf
+	$(QUIET)cat $(sort $(wildcard $(TOP)/dkms/*.local)) > $(E3_MODULE_SRC_PATH)/dkms.conf
 	$(QUIET)echo ""  >>$(E3_MODULE_SRC_PATH)/dkms.conf
-	#$(QUIET)echo "REMAKE_INITRD=yes" >>$(E3_MODULE_SRC_PATH)/dkms.conf
+	$(QUIET)echo "REMAKE_INITRD=yes" >>$(E3_MODULE_SRC_PATH)/dkms.conf
 
 
 

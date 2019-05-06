@@ -1,0 +1,8 @@
+
+
+DKMS:=/usr/sbin/dkms
+#DKMS:=/home/jhlee/private_gitsrc/dkms/dkms
+
+
+
+-include $(TOP)/configure/CONFIG_DKMS.local

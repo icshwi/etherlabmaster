@@ -9,6 +9,7 @@ include $(TOP)/configure/CONFIG_PATCHSET
 include $(TOP)/configure/E3/CONFIG_OPTIONS_BUILDER
 include $(TOP)/configure/E3/CONFIG_E3_MAKEFILE
 include $(TOP)/configure/E3/CONFIG_SUDO
+include $(TOP)/configure/E3/CONFIG_DKMS
 include $(TOP)/configure/E3/CONFIG_EXPORT
 
 # We don't use the ETHERCAT_MASTER0 within Makefile,

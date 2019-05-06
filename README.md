@@ -2,8 +2,6 @@ etherlabmaster
 ======
 Configuration Environment for EtherLab IgH EtherCAT Master at https://sourceforge.net/projects/etherlabmaster/
 
-**Please use the recent release version instead of the master branch.**
-
 ## Role
 In order to download, install, setup all relevant components (system library, kernel module, ethercat configuration, and systemd service), one should do many steps manually. This repository was designed for the easy-to-reproducible environment for EtherLab EtherCAT Master. With the following steps, one can run the EtherCAT Master on one dedicated Ethernet port within CentOS, RedHat, Ubuntu, and Debian OSs.
 
@@ -55,8 +53,9 @@ The most options are default, but we would like to keep the Site-specific option
 
 One can override each options as follows:
 ```
-echo "WITH_DEV_GENERIC = NO" > configure/CONFIG_OPTIONS.local
-echo "ENABLE_STATIC = YES"  >> configure/CONFIG_OPTIONS.local
+echo "WITH_DEV_GENERIC = NO"  > configure/CONFIG_OPTIONS.local
+echo "WITH_DEV_E1000E = YES" >> configure/CONFIG_OPTIONS.local
+echo "ENABLE_STATIC = YES"   >> configure/CONFIG_OPTIONS.local
 ```
 , where `>>` is the important thing if one would like to override more than one option. 
 
@@ -74,6 +73,7 @@ etherlabmaster (master)$ make init
 ```
 etherlabmaster (master)$ make showopts
 ```
+* `make build` calls `make autoconf` internally. However, if one would like to change the option after `make init`, one should run `make autoconf` whenever the options are changed. 
 
 ```
 etherlabmaster (master)$ make build
@@ -112,7 +112,7 @@ etherlabmaster (master)$ make setup_clean
 
 ## Steps
 
-### make init
+### `make init`
 * Download the main etherlabmaster-code from sf.net
 * Switch to Revison 9e65f7. We are using the following master revision number as the starting point  
 * Apply the Site Specific local patch files. See Ref [1].
@@ -125,22 +125,28 @@ etherlabmaster (master)$ make setup_clean
 # date:        Tue Jan 22 14:34:55 2019 +0100
 # summary:     Added extern "C" for floating-point functions.
 ```
-### make build
+
+### `make autoconf`
+* One should run this everytime when the CONFIG_OPTIONS is changed. 
+
+
+
+### `make build`
 * Ethercat program compilation
 
-### make install
+### `make install`
 * Ethercat program (configuration, lib, and others) installation
 
-### make dkms_add
+### `make dkms_add`
 * dkms add
 
-### make dkms_build
+### `make dkms_build`
 * dkms build via dkms
 
-### make dkms_install
+### `make dkms_install`
 * Kernel modules installation via dkms
 
-### make setup
+### `make setup`
 
 * Activate the EtherCAT master Network Port
 * Setup the dkms systemd service
@@ -151,7 +157,7 @@ etherlabmaster (master)$ make setup_clean
 * Put the lib path in the global ld configuration path
 
 
-### make deinit
+### `make deinit`
 * Remove the downloaded etherlabmaster-code path
 
 
@@ -237,7 +243,7 @@ Jan 07 07:23:04 mcag-epics9 systemd[1]: Failed to start EtherCAT Master Kernel M
 ```
 
 
-### References
+### References and Comments
 
 #### [1] *make patch*  
 
@@ -250,6 +256,19 @@ Jan 07 07:23:04 mcag-epics9 systemd[1]: Failed to start EtherCAT Master Kernel M
 #### [3] [patch/patchset/000.patchset_optional_eoe.p0.patch](./patch/patchset/000.patchset_optional_eoe.p0.patch)
 
 
+#### Comments 
+* It is still unclear how to build `ethercat.conf` if we have more than one devices now. 
+
+
 #### Beckhoff CCAT FPGA Kernel Mode Driver 
 
 * https://github.com/jeonghanlee/CCAT-env
+
+
+### Troubleshooting 
+
+*  One can see nothing via `ethercat slave` with `generic driver`. One should the up the ethercat master via
+
+```
+sudo ip link set dev ${ETHERCAT_MASTER0} up
+```

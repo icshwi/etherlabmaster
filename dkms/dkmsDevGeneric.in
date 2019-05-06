@@ -1,0 +1,7 @@
+#
+#
+BUILT_MODULE_NAME[__NUMBER__]="devices/ec_generic"
+DEST_MODULE_NAME[__NUMBER__]="ec_generic"
+DEST_MODULE_LOCATION[__NUMBER__]="/updates/dkms"
+#
+#

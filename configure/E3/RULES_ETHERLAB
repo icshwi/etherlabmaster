@@ -79,6 +79,7 @@ conf:
 
 .PHONY: dkms_add dkms_remove dkms_build dkms_install dkms_uninstall
 
+#dkms_add:  conf
 dkms_add:  dkmsconf conf
 	$(QUIET) $(SUDO2) 'install -m 755 -d  /usr/src/$(E3_MODULE_NAME)-$(E3_MODULE_VERSION)'
 	$(QUIET) $(SUDO2) 'cp -r $(TOP)/$(E3_MODULE_SRC_PATH)/* /usr/src/$(E3_MODULE_NAME)-$(E3_MODULE_VERSION)/'

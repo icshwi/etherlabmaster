@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-#  Copyright (c) 2018        Jeong Han Lee
+#  Copyright (c) 2018 - 2019 Jeong Han Lee
 #  Copyright (c) 2018        Ronald Mercado 
 #  Copyright (c) 2018 - 2019 European Spallation Source ERIC
 #
@@ -21,9 +21,9 @@
 #         : Ronald Mercado 
 # email   : jeonghan.lee@gmail.com
 #
-# Date    : Monday, April 29 12:02:10 CEST 2019
+# Date    : Monday, May  6 21:58:32 CEST 2019
 #
-# version : 0.0.10
+# version : 0.1.0
 
 declare -gr SC_SCRIPT="$(realpath "$0")"
 declare -gr SC_SCRIPTNAME=${0##*/}
@@ -345,7 +345,7 @@ esac
 ${SUDO_CMD} -v
 
 ## Activate the selected Ethernet Port for EtherCAT connection
-#activate_ethercat_master_network
+activate_ethercat_master_network
 
 
 # Setup Systemd for the DKMS autoinstall

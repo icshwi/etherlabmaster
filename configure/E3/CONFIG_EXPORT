@@ -2,6 +2,8 @@
 
 EXPORT_VARS+=SUDOE
 EXPORT_VARS+=SUDOBASH
+EXPORT_VARS+=SUDO2
+EXPORT_VARS+=DKMS
 EXPORT_VARS+=$(filter E3_%,$(.VARIABLES))
 
 export_version=$(eval export $1)
