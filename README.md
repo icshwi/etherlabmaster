@@ -200,7 +200,7 @@ It uses the default variable which one has to set as `ETHERCAT_MASTER0` at the b
 $ make show_netdrv
 /sys/class/net/enp0s25/device/uevent:DRIVER=e1000e
 ```
-
+Once the `e1001e` native driver is loaded within the Linux kernel, one cannot see the netdrv anymore, because the device which one allocate is not the network device anymore. 
 
 ## Troubleshooting
 
