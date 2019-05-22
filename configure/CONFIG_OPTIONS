@@ -28,5 +28,10 @@ ENABLE_SII_ASSIGN:=YES
 ENABLE_RT_SYSLOG:=YES
 
 
+## This is only valid when WITH_PATCHSET=YES
+## 
+ENABLE_RTMUTEX:=NO
+
 
 -include $(TOP)/configure/CONFIG_OPTIONS.local
+

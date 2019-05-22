@@ -55,4 +55,6 @@ VARS_EXCLUDES+=patchset_patchrevert
 VARS_EXCLUDES+=patchset_hgcfg
 VARS_EXCLUDES+=patchset
 VARS_EXCLUDES+=orig_patchset
-
+ifeq ($(WITH_PATCHSET),NO)
+VARS_EXCLUDES+=ENABLE_RTMUTEX
+endif

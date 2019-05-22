@@ -128,4 +128,11 @@ else
 E3_ETHERLAB_CONF_OPTIONS+=--enable-rt-syslog=no
 endif
 
+ifeq ($(WITH_PATCHSET),YES)
+ifeq ($(ENABLE_RTMUTEX),YES)
+E3_ETHERLAB_CONF_OPTIONS+=--enable-rtmutex=yes
+else
+E3_ETHERLAB_CONF_OPTIONS+=--enable-rtmutex=no
+endif
+endif
 
