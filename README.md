@@ -7,7 +7,6 @@ In order to download, install, setup all relevant components (system library, ke
 
 
 ## Notice
-* It may work with only **Generic EtherCAT Device Driver**. With limited resources, we cannot test this repository with other device drivers. And pull requests for other supports are always welcome!
 * If the system has already the etherlab master kernel configuration, please don't use this before cleaning up all existent configuration.
 
 ## Rules
