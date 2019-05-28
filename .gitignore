@@ -13,4 +13,5 @@ core.*
 *_old/
 etherlabmaster-code
 device_modules.conf
+*.patch~
 
