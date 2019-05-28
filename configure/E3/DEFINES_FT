@@ -45,6 +45,23 @@ done
 endef
 
 
+define patchcentos7
+for i in $(wildcard $(TOP)/patch/CentOS7/*p0.patch); do\
+	printf "\nPatching %s with the Patchset file : %s\n" "$(E3_MODULE_SRC_PATH)" "$$i";\
+	patch -d $(E3_MODULE_SRC_PATH) --ignore-whitespace -p0 < $$i;\
+done
+endef
+
+
+define patchcentos7_revert
+for i in $(wildcard $(TOP)/patch/CentOS7/*p0.patch); do\
+	printf "\nRevering path %s with the Patchset file : %s\n" "$(E3_MODULE_SRC_PATH)" "$$i";\
+	patch -R -d $(E3_MODULE_SRC_PATH) --ignore-whitespace -p0 < $$i;\
+done
+endef
+
+
+
 ifndef VERBOSE
   QUIET := @
 endif

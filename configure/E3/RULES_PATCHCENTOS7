@@ -1,0 +1,9 @@
+
+.PHONY: centos7_patch centos7_patchrevert
+
+centos7_patch:
+	$(QUIET) $(call patchcentos7)
+
+centos7_patchrevert:
+	$(QUIET) $(call patchcentos7_revert)
+

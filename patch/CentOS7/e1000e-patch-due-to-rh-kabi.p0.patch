@@ -1,0 +1,131 @@
+diff -r 5f29e43487df devices/e1000e/e1000-3.10-ethercat.h
+--- devices/e1000e/e1000-3.10-ethercat.h	Tue Jan 22 14:34:55 2019 +0100
++++ devices/e1000e/e1000-3.10-ethercat.h	Tue May 28 14:57:05 2019 +0200
+@@ -42,6 +42,7 @@
+ #include <linux/crc32.h>
+ #include <linux/if_vlan.h>
+ #include <linux/clocksource.h>
++#include <linux/timecounter.h>
+ #include <linux/net_tstamp.h>
+ #include <linux/ptp_clock_kernel.h>
+ #include <linux/ptp_classify.h>
+@@ -354,6 +355,7 @@
+ 	struct timecounter tc;
+ 	struct ptp_clock *ptp_clock;
+ 	struct ptp_clock_info ptp_clock_info;
++        struct pm_qos_request pm_qos_req;
+ 
+ 	u16 eee_advert;
+ 
+diff -r 5f29e43487df devices/e1000e/netdev-3.10-ethercat.c
+--- devices/e1000e/netdev-3.10-ethercat.c	Tue Jan 22 14:34:55 2019 +0100
++++ devices/e1000e/netdev-3.10-ethercat.c	Tue May 28 14:57:05 2019 +0200
+@@ -221,8 +221,10 @@
+ 	if (netdev) {
+ 		dev_info(&adapter->pdev->dev, "Net device Info\n");
+ 		pr_info("Device Name     state            trans_start      last_rx\n");
+-		pr_info("%-15s %016lX %016lX %016lX\n", netdev->name,
+-			netdev->state, netdev->trans_start, netdev->last_rx);
++		
++		/* pr_info("%-15s %016lX %016lX %016lX\n", netdev->name,
++		   netdev->state, netdev->trans_start, netdev->last_rx); */
++		pr_info("%-15s %016lX \n", netdev->name, netdev->state);
+ 	}
+ 
+ 	/* Print Registers */
+@@ -889,7 +891,7 @@
+ 				 struct sk_buff *skb)
+ {
+ 	if (netdev->features & NETIF_F_RXHASH)
+-		skb->rxhash = le32_to_cpu(rss);
++		skb->hash = le32_to_cpu(rss);
+ }
+ 
+ /**
+@@ -3297,9 +3299,9 @@
+ 			ew32(RXDCTL(0), rxdctl | 0x3);
+ 		}
+ 
+-		pm_qos_update_request(&adapter->netdev->pm_qos_req, lat);
++		pm_qos_update_request(&adapter->pm_qos_req, lat);
+ 	} else {
+-		pm_qos_update_request(&adapter->netdev->pm_qos_req,
++		pm_qos_update_request(&adapter->pm_qos_req,
+ 				      PM_QOS_DEFAULT_VALUE);
+ 	}
+ 
+@@ -4141,16 +4143,16 @@
+  * e1000e_cyclecounter_read - read raw cycle counter (used by time counter)
+  * @cc: cyclecounter structure
+  **/
+-static cycle_t e1000e_cyclecounter_read(const struct cyclecounter *cc)
++static u64 e1000e_cyclecounter_read(const struct cyclecounter *cc)
+ {
+ 	struct e1000_adapter *adapter = container_of(cc, struct e1000_adapter,
+ 						     cc);
+ 	struct e1000_hw *hw = &adapter->hw;
+-	cycle_t systim;
++	u64 systim;
+ 
+ 	/* latch SYSTIMH on read of SYSTIML */
+-	systim = (cycle_t)er32(SYSTIML);
+-	systim |= (cycle_t)er32(SYSTIMH) << 32;
++	systim = (u64)er32(SYSTIML);
++	systim |= (u64)er32(SYSTIMH) << 32;
+ 
+ 	return systim;
+ }
+@@ -4378,7 +4380,7 @@
+ 		e1000_update_mng_vlan(adapter);
+ 
+ 	/* DMA latency requirement to workaround jumbo issue */
+-	pm_qos_add_request(&adapter->netdev->pm_qos_req, PM_QOS_CPU_DMA_LATENCY,
++	pm_qos_add_request(&adapter->pm_qos_req, PM_QOS_CPU_DMA_LATENCY,
+ 			   PM_QOS_DEFAULT_VALUE);
+ 
+ 	/* before we allocate an interrupt, we must be ready to handle it.
+@@ -4496,7 +4498,7 @@
+ 	    !test_bit(__E1000_TESTING, &adapter->state))
+ 		e1000e_release_hw_control(adapter);
+ 
+-	pm_qos_remove_request(&adapter->netdev->pm_qos_req);
++	pm_qos_remove_request(&adapter->pm_qos_req);
+ 
+ 	pm_runtime_put_sync(&pdev->dev);
+ 
+@@ -5475,8 +5477,8 @@
+ 	struct e1000_hw *hw =  &adapter->hw;
+ 	u16 length, offset;
+ 
+-	if (vlan_tx_tag_present(skb) &&
+-	    !((vlan_tx_tag_get(skb) == adapter->hw.mng_cookie.vlan_id) &&
++	if (skb_vlan_tag_present(skb) &&
++	    !((skb_vlan_tag_get(skb) == adapter->hw.mng_cookie.vlan_id) &&
+ 	      (adapter->hw.mng_cookie.status &
+ 	       E1000_MNG_DHCP_COOKIE_STATUS_VLAN)))
+ 		return 0;
+@@ -5621,9 +5623,9 @@
+ 	if (!adapter->ecdev && e1000_maybe_stop_tx(tx_ring, count + 2))
+ 		return NETDEV_TX_BUSY;
+ 
+-	if (vlan_tx_tag_present(skb)) {
++	if (skb_vlan_tag_present(skb)) {
+ 		tx_flags |= E1000_TX_FLAGS_VLAN;
+-		tx_flags |= (vlan_tx_tag_get(skb) << E1000_TX_FLAGS_VLAN_SHIFT);
++		tx_flags |= (skb_vlan_tag_get(skb) << E1000_TX_FLAGS_VLAN_SHIFT);
+ 	}
+ 
+ 	first = tx_ring->next_to_use;
+@@ -6589,10 +6591,10 @@
+ 	.ndo_open		= e1000_open,
+ 	.ndo_stop		= e1000_close,
+ 	.ndo_start_xmit		= e1000_xmit_frame,
+-	.ndo_get_stats64	= e1000e_get_stats64,
++	.ndo_get_stats64	= (void *)e1000e_get_stats64,
+ 	.ndo_set_rx_mode	= e1000e_set_rx_mode,
+ 	.ndo_set_mac_address	= e1000_set_mac,
+-	.ndo_change_mtu		= e1000_change_mtu,
++	.ndo_change_mtu_rh74	= e1000_change_mtu,
+ 	.ndo_do_ioctl		= e1000_ioctl,
+ 	.ndo_tx_timeout		= e1000_tx_timeout,
+ 	.ndo_validate_addr	= eth_validate_addr,

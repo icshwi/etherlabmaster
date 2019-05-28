@@ -242,6 +242,13 @@ Jan 07 07:23:04 mcag-epics9 systemd[1]: Failed to start EtherCAT Master Kernel M
 -- The result is failed. 
 ```
 
+###  One can see nothing via `ethercat slave` with `generic driver`. One should the up the ethercat master via
+
+```
+sudo ip link set dev ${ETHERCAT_MASTER0} up
+```
+
+
 
 ### References and Comments
 
@@ -265,10 +272,17 @@ Jan 07 07:23:04 mcag-epics9 systemd[1]: Failed to start EtherCAT Master Kernel M
 * https://github.com/jeonghanlee/CCAT-env
 
 
-### Troubleshooting 
+### CentOS7 and e1000e native driver
 
-*  One can see nothing via `ethercat slave` with `generic driver`. One should the up the ethercat master via
+Due to `rh_kabi.h`, we cannot compile `e1000e native drvier the default kernel 3.10. Thus, it needs the special patch file for this purpose. Some functionalities are limited especially related with kernel log and a network device usage statistics. Both of them are not critical feature for ethercat application. The additional patch command `make centos7_patch` is necessary. The full commands are 
 
 ```
-sudo ip link set dev ${ETHERCAT_MASTER0} up
+make init
+make centos7_patch
+make build
+make install
+make dkms_add
+make dkms_build
+make dkms_install
+make setup
 ```
