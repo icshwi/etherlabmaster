@@ -3,10 +3,10 @@ HG_CFG:=$(HOME)/.hgrc
 
 .PHONY: orig_patchset patchset hgcfg patchset_clean
 
-## Cloning the Etherlab master patchset 20180622
-## an unofficial patchset maintained by Gavin Lambert <gavin.lambert@tomra.com>
-## http://hg.code.sf.net/u/uecasm/etherlab-patches
-##
+# Cloning the Etherlab master patchset 20180622
+# an unofficial patchset maintained by Gavin Lambert <gavin.lambert@tomra.com>
+# http://hg.code.sf.net/u/uecasm/etherlab-patches
+#
 ifeq ($(WITH_PATCHSET),YES)
 patchset: deinit patchset_hgcfg orig_patchset  patchset_patch
 	$(MAKE) patch
@@ -18,11 +18,18 @@ patchset:
 endif
 
 
-orig_patchset: 
+orig_patchset:
+ifneq (, $(shell which hg))
 	hg clone -u $(EPICS_MODULE_TAG) http://hg.code.sf.net/p/etherlabmaster/code $(E3_MODULE_SRC_PATH)
 	hg clone -u $(PATCHSET_TAG) http://hg.code.sf.net/u/uecasm/etherlab-patches $(E3_MODULE_SRC_PATH)/.hg/patches
 	cd $(E3_MODULE_SRC_PATH) && hg qpush -a
-	
+else
+	$(QUIET)echo ""
+	$(QUIET)echo "-----------------------------------------------------------------------"
+	$(QUIET)echo ">>>>  Please install mercurial, hg is needed to download sources   <<<<"
+	$(QUIET)echo "-----------------------------------------------------------------------"
+	$(QUIET)false
+endif
 
 patchset_hgcfg:
 	@echo "[extensions]"  > $(HG_CFG)

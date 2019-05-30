@@ -4,7 +4,7 @@
 WITH_PATCHSET:=NO
 
 
-## Device Options
+# Device Options
 WITH_DEV_GENERIC:=YES
 WITH_DEV_8139TOO:=NO
 WITH_DEV_E100:=NO
@@ -28,8 +28,8 @@ ENABLE_SII_ASSIGN:=YES
 ENABLE_RT_SYSLOG:=YES
 
 
-## This is only valid when WITH_PATCHSET=YES
-## 
+# This is only valid when WITH_PATCHSET=YES
+# 
 ENABLE_RTMUTEX:=NO
 
 
