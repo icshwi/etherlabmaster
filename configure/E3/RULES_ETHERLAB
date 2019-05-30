@@ -23,42 +23,42 @@ help:
 
 default: help
 
-## Install : EtherCAT Master Library, Header Files, and Program
+## Install EtherCAT Master Library, Header Files, and Program
 install: 
 	$(QUIET) $(SUDOBASH) '$(E3_MODULE_MAKE_CMDS) install'
 
-## Bninstall : EtherCAT Master Library, Header Files, and Program
+## Uninstall EtherCAT Master Library, Header Files, and Program
 uninstall: conf
 	$(QUIET) $(SUDOBASH) '$(E3_MODULE_MAKE_CMDS) uninstall'
 
 
 # Build always the Module with the EPICS_MODULES_TAG
-## Build: EtherCAT Master Library and Program
+## Build EtherCAT Master Library and Program
 build: autoconf
 	$(QUIET) $(E3_MODULE_MAKE_CMDS) build
 
 
-## Clean, build, and install the EPICS Module : EtherCAT Master Library, Header Files, and Program
+## Clean, build, and install
 rebuild: clean build install
 
 
-## Clean : EtherCAT Master Library, Header Files, and Program
+## Clean EtherCAT Master Library, Header Files, and Program
 clean: conf
 	$(QUIET) $(E3_MODULE_MAKE_CMDS) clean
 
-## Distclean : Clean and Remove the Cloned Source
+## Distclean 
 distclean: clean
 	rm -rf $(E3_MODULE_SRC_PATH)	
 
-## modules : EtherCAT Master Kernel Modules Compiliation
+## Standard kernel compilation (Please use dkms) 
 modules: conf
 	$(QUIET) $(E3_MODULE_MAKE_CMDS) modules
+
 
 modules_clean:
 	$(QUIET)  $(SUDO2) '$(E3_MODULE_MAKE_CMDS) modules clean'
 
 # always sudo is needed
-## modules_install : EtherCAT Master Kernel Modules Installation
 modules_install:
 	$(QUIET) $(SUDO2) '$(E3_MODULE_MAKE_CMDS) modules_install'
 
@@ -79,24 +79,27 @@ conf:
 
 .PHONY: dkms_add dkms_remove dkms_build dkms_install dkms_uninstall
 
-#dkms_add:  conf
+## dkms_add
 dkms_add:  dkmsconf conf
 	$(QUIET) $(SUDO2) 'install -m 755 -d  /usr/src/$(E3_MODULE_NAME)-$(E3_MODULE_VERSION)'
 	$(QUIET) $(SUDO2) 'cp -r $(TOP)/$(E3_MODULE_SRC_PATH)/* /usr/src/$(E3_MODULE_NAME)-$(E3_MODULE_VERSION)/'
 	$(QUIET) $(SUDOBASH) '$(E3_MODULE_MAKE_CMDS) dkms_add'
-
+## dkms_remove
 dkms_remove: conf
 	$(QUIET) $(SUDOBASH) '$(E3_MODULE_MAKE_CMDS) dkms_remove'
 ifneq ($(wildcard /usr/src/$(E3_MODULE_NAME)-$(E3_MODULE_VERSION)/.*),)
 	$(QUIET) $(SUDO2) 'rm -rf /usr/src/$(E3_MODULE_NAME)-$(E3_MODULE_VERSION)/'
 endif
-	     
+
+## dkms_build
 dkms_build:
 	$(QUIET) $(SUDO2) '$(E3_MODULE_MAKE_CMDS) dkms_build'
-	
+
+## dkms_install
 dkms_install:
 	$(QUIET) $(SUDOBASH) '$(E3_MODULE_MAKE_CMDS) dkms_install'
 
+## dkms_uninstall
 dkms_uninstall:
 	$(QUIET) $(SUDOBASH) '$(E3_MODULE_MAKE_CMDS) dkms_uninstall'
 
@@ -104,11 +107,11 @@ dkms_uninstall:
 
 .PHONY: setup setup_clean
 
-##  Configuration for EtherCAT Master (systemd, ethercat.conf, and others)
+## Configuration for EtherCAT Master (systemd, ethercat.conf, and others)
 setup:
 	$(QUIET) bash $(TOP)/scripts/etherlab_setup.bash -t $(E3_ETHERLAB_INSTALL_LOCATION)
 
-##  Clean up the configuration for EtherCAT Master (systemd, ethercat.conf, and others)
+## Clean up the configuration for EtherCAT Master (systemd, ethercat.conf, and others)
 setup_clean:
 	$(QUIET) bash $(TOP)/scripts/etherlab_setup_clean.bash
 
@@ -116,7 +119,14 @@ setup_clean:
 .PHONY: init deinit hg_update_rev
 
 ## Cloning the EtherCAT Master Source and Change it to the Specific Revision
+ifeq ($(WITH_PATCHSET),NO)
 init:
+ifneq ($(wildcard $(E3_MODULE_SRC_PATH)/.*),)
+	#
+	$(QUIET) echo "$(E3_MODULE_SRC_PATH) exists already."
+	$(QUIET) echo "Please do make deinit first if one would like to init."
+	#
+else
 ifneq (, $(HG_CMD))
 	hg clone http://hg.code.sf.net/p/etherlabmaster/code $(E3_MODULE_SRC_PATH) -r $(E3_ETHERLAB_BRANCH)
 	$(QUIET)cd $(E3_MODULE_SRC_PATH) && hg update -r $(EPICS_MODULE_TAG)
@@ -124,10 +134,20 @@ ifneq (, $(HG_CMD))
 	$(MAKE) patch
 else
 	$(QUIET)echo ""
-	$(QUIET)echo "-----------------------------------------------------------------------"
-	$(QUIET)echo ">>>>  Please install mercurial, hg is needed to download sources   <<<<"
-	$(QUIET)echo "-----------------------------------------------------------------------"	
+	# -----------------------------------------------------------------------
+	# >>>>  Please install mercurial, hg is needed to download sources   <<<<
+	# -----------------------------------------------------------------------	
 endif
+endif
+#
+else # ifeq ($(WITH_PATCHSET),NO)
+init:
+	$(QUIET)echo ""
+	# Please set WITH_PATCHSET=NO within configure/CONFIG_OPTIONS via
+	# echo "WITH_PATCHSET=NO" >> configure/CONFIG_OPTIONS.local
+	$(QUIET)echo ""
+endif # ifeq ($(WITH_PATCHSET),NO)
+
 
 ## Remove clone source files
 deinit:
@@ -141,7 +161,7 @@ ifneq (, $(HG_CMD))
 	$(QUIET)cd $(E3_MODULE_SRC_PATH) && hg id -nib
 else
 	$(QUIET)echo ""
-	$(QUIET)echo "-----------------------------------------------------------------------"
-	$(QUIET)echo ">>>>  Please install mercurial, hg is needed to download sources   <<<<"
-	$(QUIET)echo "-----------------------------------------------------------------------"	
+	# -----------------------------------------------------------------------
+	# >>>>  Please install mercurial, hg is needed to download sources   <<<<
+	# -----------------------------------------------------------------------
 endif
