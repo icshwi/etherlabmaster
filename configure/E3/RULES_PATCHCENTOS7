@@ -1,7 +1,7 @@
 
 .PHONY: centos7_patch centos7_patchrevert
 
-centos7_patch:
+centos7_patch: | init
 ifneq (, $(shell grep -E "CentOS.*7" /etc/os-release))
 ifneq (, $(findstring 3.10, $(shell uname -r | cut -f1-2 -d.)))
 	$(QUIET) $(call patchcentos7)
