@@ -80,3 +80,5 @@ VARS_EXCLUDES+=patchset
 VARS_EXCLUDES+=patchset_revert
 VARS_EXCLUDES+=QUIET
 VARS_EXCLUDES+=SHELL
+VARS_EXCLUDES+=patchcentos7
+VARS_EXCLUDES+=patchcentos7_revert
