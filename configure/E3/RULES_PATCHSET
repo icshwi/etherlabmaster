@@ -19,7 +19,7 @@ endif
 
 
 orig_patchset:
-ifneq (, $(shell which hg))
+ifneq (, $(shell type -P hg))
 	hg clone -u $(EPICS_MODULE_TAG) http://hg.code.sf.net/p/etherlabmaster/code $(E3_MODULE_SRC_PATH)
 	hg clone -u $(PATCHSET_TAG) http://hg.code.sf.net/u/uecasm/etherlab-patches $(E3_MODULE_SRC_PATH)/.hg/patches
 	cd $(E3_MODULE_SRC_PATH) && hg qpush -a
