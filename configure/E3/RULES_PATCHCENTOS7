@@ -2,8 +2,31 @@
 .PHONY: centos7_patch centos7_patchrevert
 
 centos7_patch:
+ifneq (, $(shell grep -E "CentOS.*7" /etc/os-release))
+ifneq (, $(findstring 3.10, $(shell uname -r | cut -f1-2 -d.)))
 	$(QUIET) $(call patchcentos7)
+else
+	# -----------------------------------------------------------------------
+	# >>>>  This rule is only valid for CentOS 7 with 3.10 kernel        <<<<
+	# -----------------------------------------------------------------------	
+endif
+else
+	# -----------------------------------------------------------------------
+	# >>>>  This rule is only valid for CentOS 7                         <<<<
+	# -----------------------------------------------------------------------
+endif
 
 centos7_patchrevert:
+ifneq (, $(shell grep -E "CentOS.*7" /etc/os-release))
+ifneq (, $(findstring 3.10, $(shell uname -r | cut -f1-2 -d.)))
 	$(QUIET) $(call patchcentos7_revert)
-
+else
+	# -----------------------------------------------------------------------
+	# >>>>  This rule is only valid for CentOS 7 with 3.10 kernel        <<<<
+	# -----------------------------------------------------------------------	
+endif
+else
+	# -----------------------------------------------------------------------
+	# >>>>  This rule is only valid for CentOS 7                         <<<<
+	# -----------------------------------------------------------------------
+endif
