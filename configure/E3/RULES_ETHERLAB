@@ -117,7 +117,7 @@ setup_clean:
 
 ## Cloning the EtherCAT Master Source and Change it to the Specific Revision
 init:
-ifneq (, $(shell type -P hg))
+ifneq (, $(shell type -P hg 2> /dev/null))
 	hg clone http://hg.code.sf.net/p/etherlabmaster/code $(E3_MODULE_SRC_PATH) -r $(E3_ETHERLAB_BRANCH)
 	$(QUIET)cd $(E3_MODULE_SRC_PATH) && hg update -r $(EPICS_MODULE_TAG)
 	$(QUIET)cd $(E3_MODULE_SRC_PATH) && hg id -nib
@@ -136,7 +136,7 @@ ifneq ($(wildcard $(E3_MODULE_SRC_PATH)/.*),)
 endif
 	
 hg_update_rev:
-ifneq (, $(shell type -P hg))
+ifneq (, $(shell type -P hg 2> /dev/null))
 	$(QUIET)cd $(E3_MODULE_SRC_PATH) && hg update -r $(EPICS_MODULE_TAG)
 	$(QUIET)cd $(E3_MODULE_SRC_PATH) && hg id -nib
 else
