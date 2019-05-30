@@ -13,16 +13,11 @@ git submodule update --init --recursive $@/.
 git submodule update --remote --merge $@/
 endef
 
-
 define patch_site
-ifneq (, $(shell type -P patch 2> /dev/null))
 for i in $(wildcard $(TOP)/patch/Site/*p0.patch); do\
 	printf "\nPatching %s with the file : %s\n" "$(E3_MODULE_SRC_PATH)" "$$i";\
 	patch -d $(E3_MODULE_SRC_PATH) --ignore-whitespace -p0 < $$i;\
 done
-else
-printf "\nPlease install patch.\n";
-endif
 endef
 
 
@@ -51,14 +46,10 @@ endef
 
 
 define patchcentos7
-ifneq (, $(shell type -P patch 2> /dev/null))
 for i in $(wildcard $(TOP)/patch/CentOS7/*p0.patch); do\
 	printf "\nPatching %s with the Patchset file : %s\n" "$(E3_MODULE_SRC_PATH)" "$$i";\
 	patch -d $(E3_MODULE_SRC_PATH) --ignore-whitespace -p0 < $$i;\
 done
-else
-printf "\nPlease install patch.\n";
-endif
 endef
 
 
