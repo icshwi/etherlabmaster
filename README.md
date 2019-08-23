@@ -1,5 +1,8 @@
 etherlabmaster
 ======
+
+[![Build Status](https://travis-ci.org/icshwi/etherlabmaster.svg?branch=master)](https://travis-ci.org/icshwi/etherlabmaster)
+
 Configuration Environment for EtherLab IgH EtherCAT Master at https://sourceforge.net/projects/etherlabmaster/
 
 ## Role
