@@ -1,7 +1,5 @@
 sudo: enabled
 
-dist: xenial
-
 language: generic
 
 branches:
