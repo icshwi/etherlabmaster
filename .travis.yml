@@ -33,5 +33,8 @@ install:
   - make install
   - tree /opt/etherlab/
   
+after_success:
+  - ip addr show
+  - grep -r 'DRIVER'  /sys/class/net/*/device/uevent
 
 
