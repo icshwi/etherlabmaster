@@ -15,8 +15,8 @@ matrix:
   include:
     - os: linux
       dist: xenial
-    - os: linux
-      dist: bionic
+#    - os: linux
+#      dist: bionic
 
       
 before_install:
@@ -33,16 +33,19 @@ install:
   - make build
   - make install
   - tree /opt/etherlab/
-  - make uninstall
-  - echo "WITH_PATCHSET=YES" >> configure/CONFIG_OPTIONS.local
-  - make patchset
-  - make showopts
-  - make build
-  - make install
-  - tree /opt/etherlab/
+  - make dkms_add
+  - make dkms_build
+  - make dkms_install
+  - make setup
+#  - echo "WITH_PATCHSET=YES" >> configure/CONFIG_OPTIONS.local
+#  - make patchset
+#  - make showopts
+#  - make build
+#  - make install
+#  - tree /opt/etherlab/
   
 after_success:
-  - ip addr show
-  - grep -r 'DRIVER'  /sys/class/net/*/device/uevent
+  - sudo systemctl start ethercat
+  - ethercat master
 
 
