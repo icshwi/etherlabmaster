@@ -20,9 +20,9 @@ matrix:
 
       
 before_install:
-  - sudo apt-get -qq update  > /dev/null 2>&1 
-  - sudo apt-get install -y linux-headers-$(uname -r)   > /dev/null 2>&1 
-  - sudo apt-get install -y build-essential realpath libtool automake tree dkms
+  - sudo apt update
+  - sudo apt install -y linux-headers-$(uname -r)
+  - sudo apt install -y build-essential libtool automake tree dkms
   - git clone https://github.com/icshwi/etherlabmaster
   
 install:
