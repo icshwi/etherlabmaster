@@ -1,0 +1,22 @@
+sudo: enabled
+
+dist: xenial
+
+language: generic
+
+branches:
+  only:
+    - master
+
+git:
+  submodules: false
+  
+
+before_install:
+  - sudo apt-get -qq update  > /dev/null 2>&1 
+  - sudo apt-get install -y linux-headers-$(uname -r)   > /dev/null 2>&1 
+  - sudo apt-get install -y build-essential realpath libtool automake tree screen mercurial dkms  > /dev/null 2>&1 
+ 
+install:
+  - bash .ci/ethercat.sh
+
