@@ -54,3 +54,12 @@ optsheader:
 show_netdrv:
 	$(QUIET)grep -r 'DRIVER'  /sys/class/net/*/device/uevent | grep -e $(ETHERCAT_MASTER0)
 
+
+.PHONY: info vers
+
+info: vers
+
+vers:
+	$(QUIET)echo "EtherlabMaster_SRCTAG:=$(EPICS_MODULE_TAG)"
+	$(QUIET)echo "EtherlabMaster_VERSION:=$(E3_MODULE_VERSION)"
+	$(QUIET)echo "ETHERCAT_MASTER0:=$(ETHERCAT_MASTER0)"
