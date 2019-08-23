@@ -1,14 +1,15 @@
 #
 EPICS_MODULE_NAME:=etherlabmaster
 
-# jhlee@hadron: etherlabmaster-code (master)$ hg heads
-# changeset:   2295:5f29e43487df
-# branch:      stable-1.5
-# tag:         tip
-# user:        Florian Pose
-# date:        Tue Jan 22 14:34:55 2019 +0100
-# summary:     Added extern "C" for floating-point functions.
-EPICS_MODULE_TAG:=5f29e43487df
+#jhlee@qweak: etherlabmaster-code (master)$ hg heads
+#changeset:   2296:0c011dc6dbc4
+#branch:      stable-1.5
+#tag:         tip
+#user:        Florian Pose
+#date:        Fri Jun 14 12:42:52 2019 +0200
+#summary:     Fixed memory leak concerning library ecrt_master_deactivate().
+
+EPICS_MODULE_TAG:=0c011dc6dbc4
 #EPICS_MODULE_TAG:=9e65f782e8a1
 
 

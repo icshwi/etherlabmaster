@@ -113,16 +113,18 @@ etherlabmaster (master)$ make setup_clean
 
 ### `make init`
 * Download the main etherlabmaster-code from sf.net
-* Switch to Revison 9e65f7. We are using the following master revision number as the starting point  
+* Switch to Revison version below. We are using the following master revision number as the starting point
 * Apply the Site Specific local patch files. See Ref [1].
+
 ```
-# jhlee@hadron: etherlabmaster-code (master)$ hg heads
-# changeset:   2295:5f29e43487df
-# branch:      stable-1.5
-# tag:         tip
-# user:        Florian Pose
-# date:        Tue Jan 22 14:34:55 2019 +0100
-# summary:     Added extern "C" for floating-point functions.
+#jhlee@qweak: etherlabmaster-code (master)$ hg heads
+#changeset:   2296:0c011dc6dbc4
+#branch:      stable-1.5
+#tag:         tip
+#user:        Florian Pose
+#date:        Fri Jun 14 12:42:52 2019 +0200
+#summary:     Fixed memory leak concerning library ecrt_master_deactivate().
+
 ```
 
 ### `make autoconf`
