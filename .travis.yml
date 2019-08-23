@@ -46,6 +46,7 @@ install:
   
 after_success:
   - sudo systemctl start ethercat
-  - ethercat master
+  - sudo ethercat
+  - sudo ethercat master
 
 
