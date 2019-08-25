@@ -26,10 +26,10 @@ jobs:
         tree /opt/etherlab/
     - name: DKMS configuration
       run: |
-        make dkms_install
-        make dkms_build
-        make dkms_install
-        make setup
+        sudo make dkms_install
+        sudo make dkms_build
+        sudo make dkms_install
+        sudo make setup
     - name: Run the ethercat master
       run: |
         sudo systemctl start ethercat
