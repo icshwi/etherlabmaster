@@ -4,7 +4,7 @@ on: [push]
 
 jobs:
   build:
-    name: Build on etherlabmaster on ${{ matrix.os }}
+    name: Build on ${{ matrix.os }}
     runs-on: ${{ matrix.os }} 
     strategy:
       matrix:
@@ -12,11 +12,11 @@ jobs:
     
     steps:
     - name: Install the packages for the etherlabmaster
-      run:
+      run: |
         sudo apt update
         sudo apt install -y linux-headers-$(uname -r) build-essential libtool automake tree dkms
     - uses: actions/checkout@v1
     - name: Run a multi-line script
-      run: 
+      run: |
         echo ${PWD}
         ip addr show
