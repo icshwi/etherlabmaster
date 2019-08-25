@@ -33,5 +33,5 @@ jobs:
     - name: Run the ethercat master
       run: |
         sudo systemctl start ethercat
-        sudo ethercat
+        sudo ethercat version
         sudo ethercat master
