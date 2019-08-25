@@ -24,14 +24,14 @@ jobs:
         make build
         make install
         tree /opt/etherlab/
-     - name: DKMS configuration
-       run: |
+    - name: DKMS configuration
+      run: |
         make dkms_install
         make dkms_build
         make dkms_install
         make setup
-     - name: Run the ethercat master
-       run: |
+    - name: Run the ethercat master
+      run: |
         sudo systemctl start ethercat
         sudo ethercat
         sudo ethercat master
