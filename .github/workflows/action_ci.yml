@@ -26,7 +26,7 @@ jobs:
         tree /opt/etherlab/
     - name: DKMS configuration
       run: |
-        sudo make dkms_install
+        sudo make dkms_add
         sudo make dkms_build
         sudo make dkms_install
         sudo make setup
