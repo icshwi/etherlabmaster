@@ -18,5 +18,10 @@ jobs:
     - uses: actions/checkout@v1
     - name: Run a multi-line script
       run: |
-        echo ${PWD}
-        ip addr show
+        echo "ETHERCAT_MASTER0=eth0" > ethercatmaster.local
+        make init
+        make showopts
+        make build
+        make install
+        tree /opt/etherlab/
+        
