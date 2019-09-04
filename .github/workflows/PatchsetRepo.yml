@@ -1,7 +1,9 @@
 name: Patchset Repo
 
-on: [push, schedule]
-  -cron: '0 22 * * *'
+on:
+  push:
+  schedule:
+   -cron: '0 22 * * *'
 jobs:
   build:
     name: Build on ${{ matrix.os }}
