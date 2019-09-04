@@ -1,8 +1,6 @@
 name: Patchset Repo
 
-on: 
-  push:
-  scheduled:
+on: [push, scheduled]
   -cron: '0 22 * * *'
 jobs:
   build:
