@@ -11,6 +11,8 @@ In order to download, install, setup all relevant components (system library, ke
 
 ## Notice
 * If the system has already the etherlab master kernel configuration, please don't use this before cleaning up all existent configuration.
+* If one would like to use it with https://github.com/epics-modules/ecmc, one should use it on *Intel* architecture. The `ecmc` needs `--enable-cycles = YES` in order to use CPU timestamp counter.
+
 
 ## Rules
 
