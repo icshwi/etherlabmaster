@@ -14,7 +14,7 @@ In order to download, install, setup all relevant components (system library, ke
 * If one would like to use it with https://github.com/epics-modules/ecmc, one should use it on **Intel** architecture. The `ecmc` needs `--enable-cycles = YES` in order to use CPU timestamp counter.
 
 ### Packages
-One should install relevant packages before trying to setup `etherlabmaster`
+One should install relevant packages before trying to setup `etherlabmaster`. After this, one should reboot the system once in order to match the running kenel version and kernel header files. If one has its own custumized kernel version, one should configure them properly. The following guide is only valid for a **Vanilla Kernel** of Debian or CentOS distributions. 
 
 * Debian
   ```
