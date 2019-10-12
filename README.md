@@ -16,10 +16,11 @@ In order to download, install, setup all relevant components (system library, ke
 ### Packages
 One should install relevant packages before trying to setup `etherlabmaster`
 
-* Debian based system
+* Debian
   ```
   apt install -y linux-headers-$(uname -r) build-essential libtool automake tree dkms
   ```
+  
 * CentOS
   ```
   yum groupinstall 'Development Tools'
