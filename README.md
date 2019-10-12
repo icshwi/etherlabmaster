@@ -5,13 +5,14 @@ etherlabmaster
 
 Configuration Environment for EtherLab IgH EtherCAT Master at https://sourceforge.net/projects/etherlabmaster/
 
-## Role
-In order to download, install, setup all relevant components (system library, kernel module, ethercat configuration, and systemd service), one should do many steps manually. This repository was designed for the easy-to-reproducible environment for EtherLab EtherCAT Master. With the following steps, one can run the EtherCAT Master on one dedicated Ethernet port within CentOS, RedHat, Ubuntu, and Debian OSs.
 
-
-## Notice
+## Notice and Warning
+* This is **NOT** a web application, **NOT** an Apps for phones, **NOT** a cloud application. 
 * If the system has already the etherlab master kernel configuration, please don't use this before cleaning up all existent configuration.
 * If one would like to use it with https://github.com/epics-modules/ecmc, one should use it on **Intel** architecture. The `ecmc` needs `--enable-cycles = YES` in order to use CPU timestamp counter.
+
+## Role
+In order to download, install, setup all relevant components (system library, kernel module, ethercat configuration, and systemd service), one should do many steps manually. This repository was designed for the easy-to-reproducible environment for EtherLab EtherCAT Master. With the following steps, one can run the EtherCAT Master on one dedicated Ethernet port within CentOS, RedHat, Ubuntu, and Debian OSs.
 
 ### Packages
 One should install relevant packages before trying to setup `etherlabmaster`. After this, one should reboot the system once in order to match the running kenel version and kernel header files. If one has its own custumized kernel version, one should configure them properly. The following guide is only valid for a **Vanilla Kernel** of Debian or CentOS distributions. 
