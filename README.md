@@ -13,6 +13,18 @@ In order to download, install, setup all relevant components (system library, ke
 * If the system has already the etherlab master kernel configuration, please don't use this before cleaning up all existent configuration.
 * If one would like to use it with https://github.com/epics-modules/ecmc, one should use it on **Intel** architecture. The `ecmc` needs `--enable-cycles = YES` in order to use CPU timestamp counter.
 
+### Packages
+One should install relevant packages before trying to setup `etherlabmaster`
+
+* Debian based system
+  ```
+  apt install -y linux-headers-$(uname -r) build-essential libtool automake tree dkms
+  ```
+* CentOS
+  ```
+  yum groupinstall 'Development Tools'
+  yum install -y kernel-devel tree dkms 
+  ```
 
 ## Rules
 
