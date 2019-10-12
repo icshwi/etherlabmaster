@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-#  Copyright (c) 2018        Jeong Han Lee
+#  Copyright (c) 2018 - 2019 Jeong Han Lee
 #  Copyright (c) 2018 - 2019 European Spallation Source ERIC
 #
 #  The program is free software: you can redistribute
@@ -18,8 +18,8 @@
 #
 # Author  : Jeong Han Lee
 # email   : jeonghan.lee@gmail.com
-# Date    : Friday, February  1 15:50:44 CET 2019
-# version : 0.0.2
+# Date    : Saturday, October 12 16:45:23 CEST 2019
+# version : 0.0.3
 
 declare -gr SC_SCRIPT="$(realpath "$0")"
 declare -gr SC_SCRIPTNAME=${0##*/}
@@ -255,7 +255,7 @@ ${SUDO_CMD} -v
 clean_setup_dkms_systemd
 clean_setup_systemd
 clean_put_udev_rule "${ECAT_KMOD_NAME}"
-clean_udev_rule_for_unmanaged;
+# clean_udev_rule_for_unmanaged;
 
 reload_trigger_udev_rule
 
