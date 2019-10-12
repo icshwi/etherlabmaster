@@ -30,7 +30,7 @@ One should install relevant packages before trying to setup `etherlabmaster`. Af
 
 ## Rules
 
-Before the setup the etherlab master, one should define the network port which one would like to use as the EtherCAT Master. Please look at scripts/ethercatmaster.conf, and enable one and disable all others to match the device which one would like to use. With the following command, without changing git status, one can set the master device in the etherlab master configuration:
+Before the setup the etherlab master, one should define the **DEDICATED** network port which one would like to use as the EtherCAT Master, and which is **NOT** the running network port. Please look at scripts/ethercatmaster.conf, and enable one and disable all others to match the device which one would like to use. With the following command, without changing git status, one can set the master device in the etherlab master configuration:
 
 ```sh
 etherlabmaster (master)$ echo "ETHERCAT_MASTER0=enp0s25" > ethercatmaster.local
