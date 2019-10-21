@@ -1,6 +1,8 @@
 etherlabmaster
 ======
 
+[![Action Main Status](https://github.com/icshwi/etherlabmaster/workflows/Main%20Repo/badge.svg)](https://github.com/icshwi/etherlabmaster/actions?workflow=Main+Repo)
+[![Action Patchset Status](https://github.com/icshwi/etherlabmaster/workflows/Patchset%20Repo/badge.svg)](https://github.com/icshwi/etherlabmaster/actions?workflow=Patchset+Repo)
 [![Build Status](https://travis-ci.org/icshwi/etherlabmaster.svg?branch=master)](https://travis-ci.org/icshwi/etherlabmaster)
 
 Configuration Environment for EtherLab IgH EtherCAT Master at https://sourceforge.net/projects/etherlabmaster/
