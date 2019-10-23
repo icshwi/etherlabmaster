@@ -1,3 +1,4 @@
+```
 etherlabmaster-code (master)$ unset LD_LIBRARY_PATH
 etherlabmaster-code (master)$ source /opt/ifc14xx/2.6-4.14/environment-setup-ppc64e6500-fsl-linux
 etherlabmaster-code (master)$ ./configure --enable-generic --disable-8139too --disable-e100 --disable-e1000 --disable-e1000e --disable-igb --disable-r8169 --disable-ccat --enable-static=yes --enable-shared=yes --enable-eoe=no --enable-cycles=yes --enable-hrtimer=no --enable-regalias=no --enable-tool=yes --enable-userlib=yes --enable-sii-assign=yes --enable-rt-syslog=yes --prefix=/opt/etherlab --host=${ARCH} --with-libtool-sysroot=${SDKTARGETSYSROOT}
@@ -24,5 +25,5 @@ ELF Header:
   Size of section headers:           64 (bytes)
   Number of section headers:         39
   Section header string table index: 38
-
+```
 
