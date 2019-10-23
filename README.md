@@ -114,7 +114,7 @@ etherlabmaster (master)$ make setup_clean
 
 ## Steps
 
-### `make init`
+#### `make init`
 * Download the main etherlabmaster-code from sf.net
 * Switch to Revison version below. We are using the following master revision number as the starting point
 * Apply the Site Specific local patch files. See Ref [1].
@@ -130,27 +130,27 @@ etherlabmaster (master)$ make setup_clean
 
 ```
 
-### `make autoconf`
+#### `make autoconf`
 * One should run this everytime when the CONFIG_OPTIONS is changed. 
 
 
 
-### `make build`
+#### `make build`
 * Ethercat program compilation
 
-### `make install`
+#### `make install`
 * Ethercat program (configuration, lib, and others) installation
 
-### `make dkms_add`
+#### `make dkms_add`
 * dkms add
 
-### `make dkms_build`
+#### `make dkms_build`
 * dkms build via dkms
 
-### `make dkms_install`
+#### `make dkms_install`
 * Kernel modules installation via dkms
 
-### `make setup`
+#### `make setup`
 
 * Activate the EtherCAT master Network Port
 * Setup the dkms systemd service
@@ -161,7 +161,7 @@ etherlabmaster (master)$ make setup_clean
 * Put the lib path in the global ld configuration path
 
 
-### `make deinit`
+#### `make deinit`
 * Remove the downloaded etherlabmaster-code path
 
 
@@ -208,50 +208,7 @@ Once the `e1001e` native driver is loaded within the Linux kernel, one cannot se
 
 ## Troubleshooting
 
-### make build error
-
-* need to install proper package, and reboot the system once in order to match the running kernel version and installed kernel source all together. 
-
-```
-configure: error: Failed to find Linux sources. Use --with-linux-dir!
-make[1]: *** [autoconf] Error 1
-```
-
-### cannot start systemd service
-
-
-* Disable the Secure Boot in the BIOS configuration, once one has the following error: `ERROR: could not insert 'ec_master': Required key not available`
-
-```
-$ systemctl start ethercat.service
-Job for ethercat.service failed because the control process exited with error code. See "systemctl status ethercat.service" and "journalctl -xe" for details. 
-
-$ journalctl -xe
-
-
--- Subject: Unit ethercat.service has begun start-up
--- Defined-By: systemd
--- Support: http://lists.freedesktop.org/mailman/listinfo/systemd-devel
--- 
--- Unit ethercat.service has begun starting up.
-Jan 07 07:23:04 mcag-epics9 ethercatctl[20684]: modprobe: ERROR: could not insert 'ec_master': Required key not available
-Jan 07 07:23:04 mcag-epics9 systemd[1]: ethercat.service: main process exited, code=exited, status=1/FAILURE
-Jan 07 07:23:04 mcag-epics9 systemd[1]: Failed to start EtherCAT Master Kernel Modules.
--- Subject: Unit ethercat.service has failed
--- Defined-By: systemd
--- Support: http://lists.freedesktop.org/mailman/listinfo/systemd-devel
--- 
--- Unit ethercat.service has failed.
--- 
--- The result is failed. 
-```
-
-###  One can see nothing via `ethercat slave` with `generic driver`. One should the up the ethercat master via
-
-```
-sudo ip link set dev ${ETHERCAT_MASTER0} up
-```
-
+[Troubleshooting](TROUBLESHOOT.md)
 
 
 ### References and Comments
