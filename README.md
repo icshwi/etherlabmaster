@@ -294,7 +294,10 @@ sudo ip link set dev ${ETHERCAT_MASTER0} up
 * https://github.com/jeonghanlee/CCAT-env
 
 
-## CentOS7 and e1000e native driver
+## CentOS7 with the NATIVE e1000e driver
+
+### Notice and Warning
+* This is **NOT** for the genric driver, **BUT** for the **NATIVE** e1000e driver. If one would like to use the genric one, it is not necessary to follow this step. If one doesn't know what difference is, one should go the generic one. 
 
 Due to `rh_kabi.h`, we cannot compile e1000e native driver the default kernel 3.10. Thus, it needs the special patch file for this purpose. Some functionalities are limited and especially related with kernel log and a network device usage statistics. Both of them are no critical things for the ethercat application. The additional makefile rule command `make centos7_patch` is necessary before `make dkms_add`. The full commands are
 
