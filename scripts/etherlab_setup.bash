@@ -21,9 +21,9 @@
 #         : Ronald Mercado 
 # email   : jeonghan.lee@gmail.com
 #
-# Date    : Monday, May  6 21:58:32 CEST 2019
+# Date    : Saturday, October 12 16:42:43 CEST 2019
 #
-# version : 0.1.0
+# version : 0.1.1
 
 declare -gr SC_SCRIPT="$(realpath "$0")"
 declare -gr SC_SCRIPTNAME=${0##*/}
@@ -362,7 +362,10 @@ setup_systemd
 
 
 put_udev_rule "${ECAT_KMOD_NAME}"
-add_udev_rule_for_unmanaged "${ETHERCAT_MASTER0}"
+# Disable unmamaged the device
+# With RT, the device is NOT the network device anymore,
+# So, we don't need it.
+#add_udev_rule_for_unmanaged "${ETHERCAT_MASTER0}"
 
 trigger_udev_rule
 

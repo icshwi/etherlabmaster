@@ -1,20 +1,38 @@
 etherlabmaster
 ======
 
+[![Action Main Status](https://github.com/icshwi/etherlabmaster/workflows/Main%20Repo/badge.svg)](https://github.com/icshwi/etherlabmaster/actions?workflow=Main+Repo)
+[![Action Patchset Status](https://github.com/icshwi/etherlabmaster/workflows/Patchset%20Repo/badge.svg)](https://github.com/icshwi/etherlabmaster/actions?workflow=Patchset+Repo)
 [![Build Status](https://travis-ci.org/icshwi/etherlabmaster.svg?branch=master)](https://travis-ci.org/icshwi/etherlabmaster)
 
 Configuration Environment for EtherLab IgH EtherCAT Master at https://sourceforge.net/projects/etherlabmaster/
 
+
+## Notice and Warning
+* This is **NOT** a web application, **NOT** an Apps for phones, **NOT** a cloud application.
+* If the system has already the etherlab master kernel configuration, please don't use this before cleaning up all existent configuration.
+* If one would like to use it with https://github.com/epics-modules/ecmc, one should use it on **Intel** architecture. The `ecmc` needs `--enable-cycles = YES` in order to use CPU timestamp counter.
+
 ## Role
 In order to download, install, setup all relevant components (system library, kernel module, ethercat configuration, and systemd service), one should do many steps manually. This repository was designed for the easy-to-reproducible environment for EtherLab EtherCAT Master. With the following steps, one can run the EtherCAT Master on one dedicated Ethernet port within CentOS, RedHat, Ubuntu, and Debian OSs.
 
+### Packages
+One should install relevant packages before trying to setup `etherlabmaster`. After this, one should reboot the system once in order to match the running kernel version and kernel header files. If one has its own customized kernel version, one should configure them properly. The following guide is only valid for a **Vanilla Kernel** of Debian or CentOS distributions.
 
-## Notice
-* If the system has already the etherlab master kernel configuration, please don't use this before cleaning up all existent configuration.
+* Debian
+  ```
+  apt install -y linux-headers-$(uname -r) build-essential libtool automake tree dkms
+  ```
+ 
+* CentOS
+  ```
+  yum groupinstall 'Development Tools'
+  yum install -y kernel-devel tree dkms
+  ```
 
 ## Rules
 
-Before the setup the etherlab master, one should define the network port which one would like to use as the EtherCAT Master. Please look at scripts/ethercatmaster.conf, and enable one and disable all others to match the device which one would like to use. With the following command, without changing git status, one can set the master device in the etherlab master configuration:
+Before the setup the etherlab master, one should define the **DEDICATED** network port which one would like to use as the EtherCAT Master, and which is **NOT** the running network port. Please look at scripts/ethercatmaster.conf, and enable one and disable all others to match the device which one would like to use. With the following command, without changing git status, one can set the master device in the etherlab master configuration:
 
 ```sh
 etherlabmaster (master)$ echo "ETHERCAT_MASTER0=enp0s25" > ethercatmaster.local
@@ -28,7 +46,7 @@ $ make showopts
 
 >>>>  Configuration Options Variables   <<<<
 
-E3_EHTERLAB_CONF_OPTIONS is defined as the follows:
+E3_EHTERLAB_CONF_OPTIONS is defined as follows:
 
 --enable-generic --disable-8139too --disable-e100 --disable-e1000 --disable-e1000e --disable-igb --disable-r8169 --disable-ccat --enable-static=no --enable-shared=yes --enable-eoe=no --enable-cycles=no --enable-hrtimer=no --enable-regalias=no --enable-tool=yes --enable-userlib=yes --enable-sii-assign=yes --enable-rt-syslog=yes
 
@@ -51,15 +69,15 @@ ENABLE_STATIC = NO
 ENABLE_TOOL = YES
 ENABLE_USERLIB = YES
 ```
-The most options are default, but we would like to keep the Site-specific options consistently. Note that the current implementation is so-called *work in progress* because of the dkms configuration. 
+The most options are default, but we would like to keep the Site-specific options consistently. Note that the current implementation is so-called *work in progress* because of the dkms configuration.
 
-One can override each options as follows:
+One can override each option as follows:
 ```
 echo "WITH_DEV_GENERIC = NO"  > configure/CONFIG_OPTIONS.local
 echo "WITH_DEV_E1000E = YES" >> configure/CONFIG_OPTIONS.local
 echo "ENABLE_STATIC = YES"   >> configure/CONFIG_OPTIONS.local
 ```
-, where `>>` is the important thing if one would like to override more than one option. 
+, where `>>` is the important thing if one would like to override more than one option.
 
 
 Be ready to do the following commands in the specific order:
@@ -75,14 +93,14 @@ etherlabmaster (master)$ make init
 ```
 etherlabmaster (master)$ make showopts
 ```
-* `make build` calls `make autoconf` internally. However, if one would like to change the option after `make init`, one should run `make autoconf` whenever the options are changed. 
+* `make build` calls `make autoconf` internally. However, if one would like to change the option after `make init`, one should run `make autoconf` whenever the options are changed.
 
 ```
 etherlabmaster (master)$ make build
 etherlabmaster (master)$ make install
 ```
 
-Kernel modules are built via dkms. Note that the system should install the ```dkms``` package first. 
+Kernel modules are built via dkms. Note that the system should install the `dkms` package first.
 
 ```sh
 etherlabmaster (master)$ make dkms_add
@@ -131,9 +149,7 @@ etherlabmaster (master)$ make setup_clean
 ```
 
 #### `make autoconf`
-* One should run this everytime when the CONFIG_OPTIONS is changed. 
-
-
+* One should run this every time when the CONFIG_OPTIONS is changed.
 
 #### `make build`
 * Ethercat program compilation
@@ -155,7 +171,7 @@ etherlabmaster (master)$ make setup_clean
 * Activate the EtherCAT master Network Port
 * Setup the dkms systemd service
 * Setup the ethercat systemd service
-* Put the UDEV rule to allow an user to access the ethercat master port
+* Put the UDEV rule to allow a user to access the ethercat master port
 * Put the UDEV rule to do *unmanaged*able on the ethercat master port by NetworkManager
 * Create the symbolic link for the ethercat executable command
 * Put the lib path in the global ld configuration path
@@ -167,7 +183,7 @@ etherlabmaster (master)$ make setup_clean
 
 ## Etherlab master patchset 20180622
 
-One can use the unofficial patchset maintained by Gavin Lambert [2] with the local patch file [3], because the unofficial patchset is *ONLY* valid for `--enable-eoe=yes`.  The local `make patch` is executed after all patchset. So we don't need to run it individually. 
+One can use the unofficial patchset maintained by Gavin Lambert [2] with the local patch file [3], because the unofficial patchset is *ONLY* valid for `--enable-eoe=yes`.  The local `make patch` is executed after all patchset. So we don't need to run it individually.
 
 
 ```sh
@@ -188,7 +204,7 @@ etherlabmaster (master)$ make build
 etherlabmaster (master)$ make install
 ```
 
-Kernel modules are built via dkms. Note that the system should install the `dkms` package first. 
+Kernel modules are built via dkms. Note that the system should install the `dkms` package first.
 
 ```sh
 etherlabmaster (master)$ make dkms_add
@@ -204,7 +220,7 @@ It uses the default variable which one has to set as `ETHERCAT_MASTER0` at the b
 $ make show_netdrv
 /sys/class/net/enp0s25/device/uevent:DRIVER=e1000e
 ```
-Once the `e1001e` native driver is loaded within the Linux kernel, one cannot see the netdrv anymore, because the device which one allocate is not the network device anymore. 
+Once the `e1001e` native driver is loaded within the Linux kernel, one cannot see the netdrv anymore, because the device which one allocate is not the network device anymore.
 
 ## Troubleshooting
 
@@ -224,18 +240,21 @@ Once the `e1001e` native driver is loaded within the Linux kernel, one cannot se
 #### [3] [patch/patchset/000.patchset_optional_eoe.p0.patch](./patch/patchset/000.patchset_optional_eoe.p0.patch)
 
 
-#### Comments 
-* It is still unclear how to build `ethercat.conf` if we have more than one devices now. 
+#### Comments
+* It is still unclear how to build `ethercat.conf` if we have more than one devices now.
 
 
-#### Beckhoff CCAT FPGA Kernel Mode Driver 
+#### Beckhoff CCAT FPGA Kernel Mode Driver
 
 * https://github.com/jeonghanlee/CCAT-env
 
 
-## CentOS7 and e1000e native driver
+## CentOS7 with the NATIVE e1000e driver
 
-Due to `rh_kabi.h`, we cannot compile e1000e native drvier the default kernel 3.10. Thus, it needs the special patch file for this purpose. Some functionalities are limited and especially related with kernel log and a network device usage statistics. Both of them are no critical things for the ethercat application. The additional make rule command `make centos7_patch` is necessary before `make dkms_add`. The full commands are 
+### Notice and Warning
+* This is **NOT** for the genric driver, **BUT** for the **NATIVE** e1000e driver. If one would like to use the genric one, it is not necessary to follow this step. If one doesn't know what difference is, one should go the generic one. 
+
+Due to `rh_kabi.h`, we cannot compile e1000e native driver the default kernel 3.10. Thus, it needs the special patch file for this purpose. Some functionalities are limited and especially related with kernel log and a network device usage statistics. Both of them are no critical things for the ethercat application. The additional makefile rule command `make centos7_patch` is necessary before `make dkms_add`. The full commands are
 
 ```
 make init
@@ -247,3 +266,4 @@ make dkms_build
 make dkms_install
 make setup
 ```
+
