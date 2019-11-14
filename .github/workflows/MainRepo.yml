@@ -1,10 +1,7 @@
 name: Main Repo
 
-on:
-  push:
-  schedule:
-    - cron:  '0 9 * * *'
-
+on: [push, pull_request]
+  
 jobs:
   build:
     name: Build on ${{ matrix.os }}
