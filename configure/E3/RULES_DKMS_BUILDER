@@ -23,7 +23,12 @@ yesconf:
 	@init_drv_num=0;\
 	device_modules="";\
 	for drv in $(YES_VARS); do\
-	    driver_name=$$(echo $$drv | sed -e "s:WITH_DEV_::g" | sed -e 's/\(.*\)/\L\1/');\
+	    driver_path_name=$$(echo $$drv | sed -e "s:WITH_DEV_::g" | sed -e 's/\(.*\)/\L\1/');\
+	    if [ "$$driver_path_name" = "ccat" ]; then\
+	      driver_name=$$(echo $$driver_path_name)"_netdev";\
+	    else\
+	      driver_name="$$driver_path_name";\
+	    fi;\
 	    device_modules="$$driver_name $$device_modules";\
 	    driver_name="$$driver_name";\
 	    init_drv_num=$$(($$init_drv_num+1));\
@@ -31,7 +36,7 @@ yesconf:
 	    if [ "$$driver_name" = "generic" ]; then\
 	      sed -e "s:__NUMBER__:$$init_drv_num:g" < $(TOP)/dkms/dkmsDevGeneric.in > $(TOP)/dkms/dkmsDev$$init_drv_num.local;\
 	    else\
-	      sed -e "s:__NAME__:$$driver_name:g" -e "s:__NUMBER__:$$init_drv_num:g" < $(TOP)/dkms/dkmsDevN.in > $(TOP)/dkms/dkmsDev$$init_drv_num.local;\
+	      sed -e "s:__PATHNAME__:"$$driver_path_name":g" -e "s:__NAME__:"$$driver_name":g" -e "s:__NUMBER__:$$init_drv_num:g" < $(TOP)/dkms/dkmsDevN.in > $(TOP)/dkms/dkmsDev$$init_drv_num.local;\
 	    fi;\
 	done;\
 	echo "DEVICE_MODULES=\"$${device_modules%?}\"" > $(TOP)/scripts/device_modules.conf

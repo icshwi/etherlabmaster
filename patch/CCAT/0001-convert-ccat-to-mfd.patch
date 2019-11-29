@@ -1,0 +1,1489 @@
+# HG changeset patch
+# User Patrick Bruenn <p.bruenn@beckhoff.com>
+# Date 1511939873 -3600
+#      Wed Nov 29 08:17:53 2017 +0100
+# Branch stable-1.5
+# Node ID 97f5bd7b9f704c8f81506b62e31830a70339d8db
+# Parent  8d326521a269f6d2c7217b7c7c1fd3aca32911ad
+ccat: converted into mfd driver
+
+In order to prepare ccat for mainline kernel integration it was converted into
+a mfd (multi-function device) driver.
+
+This requires two major changes to ec_ccat:
+1. ccat got split into multiple modules, for etherlab only the netdev module is
+required to be patched. So we can remove the code for the basic module, gpio,
+sram and update from the etherlab repository.
+2. Etherlab should replace the ccat_netdev module and not the basic ccat module.
+So we have to rename ec_ccat into ec_ccat_netdev.
+
+Installing ec_ccat_netdev becomes a little bit more compilcated as from now on,
+you need to install the basic ccat driver from upstream and only load the netdev
+part from etherlab. We hope when ccat becomes available in mainline Linux this
+won't remain a drawback.
+
+diff -r 8d326521a269 -r 97f5bd7b9f70 configure.ac
+--- a/configure.ac	Wed Nov 29 07:21:16 2017 +0100
++++ b/configure.ac	Wed Nov 29 08:17:53 2017 +0100
+@@ -540,8 +540,8 @@
+ 
+ AC_MSG_CHECKING([whether to build the CCAT driver])
+ 
+-AC_ARG_ENABLE([ccat],
+-    AS_HELP_STRING([--enable-ccat],
++AC_ARG_ENABLE([ccat_netdev],
++    AS_HELP_STRING([--enable-ccat_netdev],
+                    [Enable CCAT driver]),
+     [
+         case "${enableval}" in
+@@ -549,7 +549,7 @@
+                 ;;
+             no) enableccat=0
+                 ;;
+-            *) AC_MSG_ERROR([Invalid value for --enable-ccat])
++            *) AC_MSG_ERROR([Invalid value for --enable-ccat_netdev])
+                 ;;
+         esac
+     ],
+diff -r 8d326521a269 -r 97f5bd7b9f70 devices/ccat/Kbuild.in
+--- a/devices/ccat/Kbuild.in	Wed Nov 29 07:21:16 2017 +0100
++++ b/devices/ccat/Kbuild.in	Wed Nov 29 08:17:53 2017 +0100
+@@ -34,18 +34,9 @@
+ TOPDIR := $(src)/../..
+ 
+ ifeq (@ENABLE_CCAT@,1)
+-	obj-m += ec_ccat.o
+-
+-	ec_ccat-objs := \
+-		module.o \
+-		netdev.o \
+-		sram.o \
+-		update.o
+-
+-ifdef CONFIG_GPIO
+-	ec_ccat-objs += gpio.o
+-endif
+-
++	obj-m += ec_ccat_netdev.o
++	ec_ccat_netdev-objs := \
++		netdev.o
+ 	CFLAGS_ccat_main-ethercat.o = -DREV=$(REV)
+ endif
+ 
+diff -r 8d326521a269 -r 97f5bd7b9f70 devices/ccat/Makefile.am
+--- a/devices/ccat/Makefile.am	Wed Nov 29 07:21:16 2017 +0100
++++ b/devices/ccat/Makefile.am	Wed Nov 29 08:17:53 2017 +0100
+@@ -29,11 +29,7 @@
+ 
+ EXTRA_DIST = \
+ 	Kbuild.in \
+-	gpio.h \
+-	module.h \
+-	netdev.h \
+-	sram.h \
+-	update.h
++	module.h
+ 
+ BUILT_SOURCES = \
+ 	Kbuild
+diff -r 8d326521a269 -r 97f5bd7b9f70 devices/ccat/gpio.c
+--- a/devices/ccat/gpio.c	Wed Nov 29 07:21:16 2017 +0100
++++ /dev/null	Thu Jan 01 00:00:00 1970 +0000
+@@ -1,164 +0,0 @@
+-/**
+-    Network Driver for Beckhoff CCAT communication controller
+-    Copyright (C) 2014  Beckhoff Automation GmbH
+-    Author: Patrick Bruenn <p.bruenn@beckhoff.com>
+-
+-    This program is free software; you can redistribute it and/or modify
+-    it under the terms of the GNU General Public License as published by
+-    the Free Software Foundation; either version 2 of the License, or
+-    (at your option) any later version.
+-
+-    This program is distributed in the hope that it will be useful,
+-    but WITHOUT ANY WARRANTY; without even the implied warranty of
+-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+-    GNU General Public License for more details.
+-
+-    You should have received a copy of the GNU General Public License along
+-    with this program; if not, write to the Free Software Foundation, Inc.,
+-    51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+-*/
+-
+-#include <linux/kernel.h>
+-#include <linux/module.h>
+-#include <linux/gpio.h>
+-#include <linux/version.h>
+-#include "module.h"
+-
+-/**
+- * struct ccat_gpio - CCAT GPIO function
+- * @ioaddr: PCI base address of the CCAT Update function
+- * @info: holds a copy of the CCAT Update function information block (read from PCI config space)
+- */
+-struct ccat_gpio {
+-	struct gpio_chip chip;
+-	void __iomem *ioaddr;
+-	struct mutex lock;
+-};
+-
+-/** TODO implement in LED driver
+-	#define TC_RED 0x01
+-	#define TC_GREEN 0x02
+-	#define TC_BLUE 0x04
+-	#define FB1_RED 0x08
+-	#define FB1_GREEN 0x10
+-	#define FB1_BLUE 0x20
+-	#define FB2_RED 0x40
+-	#define FB2_GREEN 0x80
+-	#define FB2_BLUE 0x100
+- */
+-
+-static int set_bit_in_register(struct mutex *lock, void __iomem * ioaddr,
+-			       unsigned nr, int val)
+-{
+-	volatile unsigned long old;
+-
+-	mutex_lock(lock);
+-	old = ioread32(ioaddr);
+-	val ? set_bit(nr, &old) : clear_bit(nr, &old);
+-	if (val)
+-		set_bit(nr, &old);
+-	else
+-		clear_bit(nr, &old);
+-	iowrite32(old, ioaddr);
+-	mutex_unlock(lock);
+-	return 0;
+-}
+-
+-static int ccat_gpio_get_direction(struct gpio_chip *chip, unsigned nr)
+-{
+-	struct ccat_gpio *gdev = container_of(chip, struct ccat_gpio, chip);
+-	const size_t byte_offset = 4 * (nr / 32) + 0x8;
+-	const u32 mask = 1 << (nr % 32);
+-
+-	return !(mask & ioread32(gdev->ioaddr + byte_offset));
+-}
+-
+-static int ccat_gpio_direction_input(struct gpio_chip *chip, unsigned nr)
+-{
+-	struct ccat_gpio *gdev = container_of(chip, struct ccat_gpio, chip);
+-
+-	return set_bit_in_register(&gdev->lock, gdev->ioaddr + 0x8, nr, 0);
+-}
+-
+-static int ccat_gpio_direction_output(struct gpio_chip *chip, unsigned nr,
+-				      int val)
+-{
+-	struct ccat_gpio *gdev = container_of(chip, struct ccat_gpio, chip);
+-
+-	return set_bit_in_register(&gdev->lock, gdev->ioaddr + 0x8, nr, 1);
+-}
+-
+-static int ccat_gpio_get(struct gpio_chip *chip, unsigned nr)
+-{
+-	struct ccat_gpio *gdev = container_of(chip, struct ccat_gpio, chip);
+-	const size_t byte_off = 4 * (nr / 32);
+-	const int mask = 1 << (nr % 32);
+-	int dir_off;
+-	int value;
+-
+-	/** omit direction changes before value was read */
+-	mutex_lock(&gdev->lock);
+-	dir_off = 0x10 * ccat_gpio_get_direction(chip, nr);
+-	value = !(mask & ioread32(gdev->ioaddr + byte_off + dir_off));
+-	mutex_unlock(&gdev->lock);
+-	return value;
+-}
+-
+-static void ccat_gpio_set(struct gpio_chip *chip, unsigned nr, int val)
+-{
+-	struct ccat_gpio *gdev = container_of(chip, struct ccat_gpio, chip);
+-
+-	set_bit_in_register(&gdev->lock, gdev->ioaddr, nr, val);
+-}
+-
+-static const struct gpio_chip ccat_gpio_chip = {
+-	.label = KBUILD_MODNAME,
+-	.owner = THIS_MODULE,
+-#if (LINUX_VERSION_CODE >= KERNEL_VERSION(3,12,0))
+-	.get_direction = ccat_gpio_get_direction,
+-#endif
+-	.direction_input = ccat_gpio_direction_input,
+-	.get = ccat_gpio_get,
+-	.direction_output = ccat_gpio_direction_output,
+-	.set = ccat_gpio_set,
+-	.dbg_show = NULL,
+-	.base = -1,
+-	.can_sleep = false
+-};
+-
+-static int ccat_gpio_probe(struct ccat_function *func)
+-{
+-	struct ccat_gpio *const gpio = kzalloc(sizeof(*gpio), GFP_KERNEL);
+-	int ret;
+-
+-	if (!gpio)
+-		return -ENOMEM;
+-
+-	gpio->ioaddr = func->ccat->bar_0 + func->info.addr;
+-	memcpy(&gpio->chip, &ccat_gpio_chip, sizeof(gpio->chip));
+-	gpio->chip.ngpio = func->info.num_gpios;
+-	mutex_init(&gpio->lock);
+-
+-	ret = gpiochip_add(&gpio->chip);
+-	if (ret) {
+-		kfree(gpio);
+-		return ret;
+-	}
+-	pr_info("registered %s as gpiochip%d with #%d GPIOs.\n",
+-		gpio->chip.label, gpio->chip.base, gpio->chip.ngpio);
+-	func->private_data = gpio;
+-	return 0;
+-}
+-
+-static void ccat_gpio_remove(struct ccat_function *func)
+-{
+-	struct ccat_gpio *const gpio = func->private_data;
+-
+-	gpiochip_remove(&gpio->chip);
+-};
+-
+-const struct ccat_driver gpio_driver = {
+-	.type = CCATINFO_GPIO,
+-	.probe = ccat_gpio_probe,
+-	.remove = ccat_gpio_remove,
+-};
+diff -r 8d326521a269 -r 97f5bd7b9f70 devices/ccat/module.c
+--- a/devices/ccat/module.c	Wed Nov 29 07:21:16 2017 +0100
++++ /dev/null	Thu Jan 01 00:00:00 1970 +0000
+@@ -1,427 +0,0 @@
+-/**
+-    Network Driver for Beckhoff CCAT communication controller
+-    Copyright (C) 2014-2015  Beckhoff Automation GmbH
+-    Author: Patrick Bruenn <p.bruenn@beckhoff.com>
+-
+-    This program is free software; you can redistribute it and/or modify
+-    it under the terms of the GNU General Public License as published by
+-    the Free Software Foundation; either version 2 of the License, or
+-    (at your option) any later version.
+-
+-    This program is distributed in the hope that it will be useful,
+-    but WITHOUT ANY WARRANTY; without even the implied warranty of
+-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+-    GNU General Public License for more details.
+-
+-    You should have received a copy of the GNU General Public License along
+-    with this program; if not, write to the Free Software Foundation, Inc.,
+-    51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+-*/
+-
+-#include <linux/etherdevice.h>
+-#include <linux/module.h>
+-#include <linux/netdevice.h>
+-#include <linux/platform_device.h>
+-#include <linux/version.h>
+-#include "module.h"
+-
+-MODULE_DESCRIPTION(DRV_DESCRIPTION);
+-MODULE_AUTHOR("Patrick Bruenn <p.bruenn@beckhoff.com>");
+-MODULE_LICENSE("GPL");
+-MODULE_VERSION(DRV_VERSION);
+-
+-#if (LINUX_VERSION_CODE < KERNEL_VERSION(3,12,27))
+-/*
+- * Set both the DMA mask and the coherent DMA mask to the same thing.
+- * Note that we don't check the return value from dma_set_coherent_mask()
+- * as the DMA API guarantees that the coherent DMA mask can be set to
+- * the same or smaller than the streaming DMA mask.
+- */
+-static inline int dma_set_mask_and_coherent(struct device *dev, u64 mask)
+-{
+-	int rc = dma_set_mask(dev, mask);
+-	if (rc == 0)
+-		dma_set_coherent_mask(dev, mask);
+-	return rc;
+-}
+-#endif
+-
+-/**
+- * configure the drivers capabilities here
+- */
+-static const struct ccat_driver *const drivers[] = {
+-#ifdef CONFIG_PCI
+-	&eth_dma_driver,	/* load Ethernet MAC/EtherCAT Master driver with DMA support from netdev.c */
+-#endif
+-	&eth_eim_driver,	/* load Ethernet MAC/EtherCAT Master driver without DMA support from */
+-#ifdef CONFIG_GPIO
+-	&gpio_driver,		/* load GPIO driver from gpio.c */
+-#endif
+-	&sram_driver,		/* load SRAM driver from sram.c */
+-	&update_driver,		/* load Update driver from update.c */
+-};
+-
+-static int __init ccat_class_init(struct ccat_class *base)
+-{
+-	if (1 == atomic_inc_return(&base->instances)) {
+-		if (alloc_chrdev_region
+-		    (&base->dev, 0, base->count, KBUILD_MODNAME)) {
+-			pr_warn("alloc_chrdev_region() for '%s' failed\n",
+-				base->name);
+-			return -1;
+-		}
+-
+-		base->class = class_create(THIS_MODULE, base->name);
+-		if (!base->class) {
+-			pr_warn("Create device class '%s' failed\n",
+-				base->name);
+-			unregister_chrdev_region(base->dev, base->count);
+-			return -1;
+-		}
+-	}
+-	return 0;
+-}
+-
+-static void ccat_class_exit(struct ccat_class *base)
+-{
+-	if (!atomic_dec_return(&base->instances)) {
+-		class_destroy(base->class);
+-		unregister_chrdev_region(base->dev, base->count);
+-	}
+-}
+-
+-static void free_ccat_cdev(struct ccat_cdev *ccdev)
+-{
+-	ccat_class_exit(ccdev->class);
+-	ccdev->dev = 0;
+-}
+-
+-static struct ccat_cdev *alloc_ccat_cdev(struct ccat_class *base)
+-{
+-	int i = 0;
+-
+-	ccat_class_init(base);
+-	for (i = 0; i < base->count; ++i) {
+-		if (base->devices[i].dev == 0) {
+-			base->devices[i].dev = MKDEV(MAJOR(base->dev), i);
+-			return &base->devices[i];
+-		}
+-	}
+-	pr_warn("exceeding max. number of '%s' devices (%d)\n",
+-		base->class->name, base->count);
+-	atomic_dec_return(&base->instances);
+-	return NULL;
+-}
+-
+-static int ccat_cdev_init(struct cdev *cdev, dev_t dev, struct class *class,
+-			  struct file_operations *fops)
+-{
+-	if (!device_create
+-	    (class, NULL, dev, NULL, "%s%d", class->name, MINOR(dev))) {
+-		pr_warn("device_create() failed\n");
+-		return -1;
+-	}
+-
+-	cdev_init(cdev, fops);
+-	cdev->owner = fops->owner;
+-	if (cdev_add(cdev, dev, 1)) {
+-		pr_warn("add update device failed\n");
+-		device_destroy(class, dev);
+-		return -1;
+-	}
+-
+-	pr_info("registered %s%d.\n", class->name, MINOR(dev));
+-	return 0;
+-}
+-
+-int ccat_cdev_open(struct inode *const i, struct file *const f)
+-{
+-	struct ccat_cdev *ccdev =
+-	    container_of(i->i_cdev, struct ccat_cdev, cdev);
+-	struct cdev_buffer *buf;
+-
+-	if (!atomic_dec_and_test(&ccdev->in_use)) {
+-		atomic_inc(&ccdev->in_use);
+-		return -EBUSY;
+-	}
+-
+-	buf = kzalloc(sizeof(*buf) + ccdev->iosize, GFP_KERNEL);
+-	if (!buf) {
+-		atomic_inc(&ccdev->in_use);
+-		return -ENOMEM;
+-	}
+-
+-	buf->ccdev = ccdev;
+-	f->private_data = buf;
+-	return 0;
+-}
+-
+-int ccat_cdev_probe(struct ccat_function *func, struct ccat_class *cdev_class,
+-		    size_t iosize)
+-{
+-	struct ccat_cdev *const ccdev = alloc_ccat_cdev(cdev_class);
+-	if (!ccdev) {
+-		return -ENOMEM;
+-	}
+-
+-	ccdev->ioaddr = func->ccat->bar_0 + func->info.addr;
+-	ccdev->iosize = iosize;
+-	atomic_set(&ccdev->in_use, 1);
+-
+-	if (ccat_cdev_init
+-	    (&ccdev->cdev, ccdev->dev, cdev_class->class, &cdev_class->fops)) {
+-		pr_warn("ccat_cdev_probe() failed\n");
+-		free_ccat_cdev(ccdev);
+-		return -1;
+-	}
+-	ccdev->class = cdev_class;
+-	func->private_data = ccdev;
+-	return 0;
+-}
+-
+-int ccat_cdev_release(struct inode *const i, struct file *const f)
+-{
+-	const struct cdev_buffer *const buf = f->private_data;
+-	struct ccat_cdev *const ccdev = buf->ccdev;
+-
+-	kfree(f->private_data);
+-	atomic_inc(&ccdev->in_use);
+-	return 0;
+-}
+-
+-void ccat_cdev_remove(struct ccat_function *func)
+-{
+-	struct ccat_cdev *const ccdev = func->private_data;
+-
+-	cdev_del(&ccdev->cdev);
+-	device_destroy(ccdev->class->class, ccdev->dev);
+-	free_ccat_cdev(ccdev);
+-}
+-
+-static const struct ccat_driver *ccat_function_connect(struct ccat_function
+-						       *const func)
+-{
+-	int i;
+-
+-	for (i = 0; i < ARRAY_SIZE(drivers); ++i) {
+-		if (func->info.type == drivers[i]->type) {
+-			return drivers[i]->probe(func) ? NULL : drivers[i];
+-		}
+-	}
+-	return NULL;
+-}
+-
+-/**
+- * Initialize all available CCAT functions.
+- *
+- * Return: count of failed functions
+- */
+-static int ccat_functions_init(struct ccat_device *const ccatdev)
+-{
+-	static const size_t block_size = sizeof(struct ccat_info_block);
+-	struct ccat_function *next = kzalloc(sizeof(*next), GFP_KERNEL);
+-	void __iomem *addr = ccatdev->bar_0; /** first block is the CCAT information block entry */
+-	const u8 num_func = ioread8(addr + 4); /** number of CCAT function blocks is at offset 0x4 */
+-	const void __iomem *end = addr + (block_size * num_func);
+-
+-	INIT_LIST_HEAD(&ccatdev->functions);
+-	for (; addr < end && next; addr += block_size) {
+-		memcpy_fromio(&next->info, addr, sizeof(next->info));
+-		if (CCATINFO_NOTUSED != next->info.type) {
+-			next->ccat = ccatdev;
+-			next->drv = ccat_function_connect(next);
+-			if (next->drv) {
+-				list_add(&next->list, &ccatdev->functions);
+-				next = kzalloc(sizeof(*next), GFP_KERNEL);
+-			}
+-		}
+-	}
+-	kfree(next);
+-	return list_empty(&ccatdev->functions);
+-}
+-
+-/**
+- * Destroy all previously initialized CCAT functions
+- */
+-static void ccat_functions_remove(struct ccat_device *const dev)
+-{
+-	struct ccat_function *func;
+-	struct ccat_function *tmp;
+-	list_for_each_entry_safe(func, tmp, &dev->functions, list) {
+-		if (func->drv) {
+-			func->drv->remove(func);
+-			func->drv = NULL;
+-		}
+-		list_del(&func->list);
+-		kfree(func);
+-	}
+-}
+-
+-#ifdef CONFIG_PCI
+-static int ccat_pci_probe(struct pci_dev *pdev, const struct pci_device_id *id)
+-{
+-	struct ccat_device *ccatdev;
+-	u8 rev;
+-	int status;
+-
+-	ccatdev = devm_kzalloc(&pdev->dev, sizeof(*ccatdev), GFP_KERNEL);
+-	if (!ccatdev) {
+-		pr_err("%s() out of memory.\n", __FUNCTION__);
+-		return -ENOMEM;
+-	}
+-	ccatdev->pdev = pdev;
+-	pci_set_drvdata(pdev, ccatdev);
+-
+-	status = pci_enable_device_mem(pdev);
+-	if (status) {
+-		pr_err("enable %s failed: %d\n", pdev->dev.kobj.name, status);
+-		return status;
+-	}
+-
+-	status = pci_read_config_byte(pdev, PCI_REVISION_ID, &rev);
+-	if (status) {
+-		pr_err("read CCAT pci revision failed with %d\n", status);
+-		goto disable_device;
+-	}
+-
+-	status = pci_request_regions(pdev, KBUILD_MODNAME);
+-	if (status) {
+-		pr_err("allocate mem_regions failed.\n");
+-		goto disable_device;
+-	}
+-
+-	status = dma_set_mask_and_coherent(&pdev->dev, DMA_BIT_MASK(64));
+-	if (status) {
+-		status =
+-		    dma_set_mask_and_coherent(&pdev->dev, DMA_BIT_MASK(32));
+-		if (status) {
+-			pr_err("No suitable DMA available, pci rev: %u\n", rev);
+-			goto release_regions;
+-		}
+-		pr_debug("32 bit DMA supported, pci rev: %u\n", rev);
+-	} else {
+-		pr_debug("64 bit DMA supported, pci rev: %u\n", rev);
+-	}
+-
+-	ccatdev->bar_0 = pci_iomap(pdev, 0, 0);
+-	if (!ccatdev->bar_0) {
+-		pr_err("initialization of bar0 failed.\n");
+-		status = -EIO;
+-		goto release_regions;
+-	}
+-
+-	ccatdev->bar_2 = pci_iomap(pdev, 2, 0);
+-	if (!ccatdev->bar_2) {
+-		pr_warn("initialization of optional bar2 failed.\n");
+-	}
+-
+-	pci_set_master(pdev);
+-	if (ccat_functions_init(ccatdev)) {
+-		pr_warn("some functions couldn't be initialized\n");
+-	}
+-	return 0;
+-
+-release_regions:
+-	pci_release_regions(pdev);
+-disable_device:
+-	pci_disable_device(pdev);
+-	return status;
+-}
+-
+-static void ccat_pci_remove(struct pci_dev *pdev)
+-{
+-	struct ccat_device *ccatdev = pci_get_drvdata(pdev);
+-
+-	if (ccatdev) {
+-		ccat_functions_remove(ccatdev);
+-		if (ccatdev->bar_2)
+-			pci_iounmap(pdev, ccatdev->bar_2);
+-		pci_iounmap(pdev, ccatdev->bar_0);
+-		pci_release_regions(pdev);
+-		pci_disable_device(pdev);
+-	}
+-}
+-
+-#define PCI_DEVICE_ID_BECKHOFF_CCAT 0x5000
+-#define PCI_VENDOR_ID_BECKHOFF 0x15EC
+-
+-static const struct pci_device_id pci_ids[] = {
+-	{PCI_DEVICE(PCI_VENDOR_ID_BECKHOFF, PCI_DEVICE_ID_BECKHOFF_CCAT)},
+-	{0,},
+-};
+-
+-/* prevent auto-loading. */
+-/* MODULE_DEVICE_TABLE(pci, pci_ids); */
+-
+-static struct pci_driver ccat_pci_driver = {
+-	.name = KBUILD_MODNAME,
+-	.id_table = pci_ids,
+-	.probe = ccat_pci_probe,
+-	.remove = ccat_pci_remove,
+-};
+-
+-module_pci_driver(ccat_pci_driver);
+-
+-#else /* #ifdef CONFIG_PCI */
+-
+-static int ccat_eim_probe(struct platform_device *pdev)
+-{
+-	struct ccat_device *ccatdev;
+-
+-	ccatdev = devm_kzalloc(&pdev->dev, sizeof(*ccatdev), GFP_KERNEL);
+-	if (!ccatdev) {
+-		pr_err("%s() out of memory.\n", __FUNCTION__);
+-		return -ENOMEM;
+-	}
+-	ccatdev->pdev = pdev;
+-	platform_set_drvdata(pdev, ccatdev);
+-
+-	if (!request_mem_region(0xf0000000, 0x02000000, pdev->name)) {
+-		pr_warn("request mem region failed.\n");
+-		return -EIO;
+-	}
+-
+-	if (!(ccatdev->bar_0 = ioremap(0xf0000000, 0x02000000))) {
+-		pr_warn("initialization of bar0 failed.\n");
+-		return -EIO;
+-	}
+-
+-	ccatdev->bar_2 = NULL;
+-
+-	if (ccat_functions_init(ccatdev)) {
+-		pr_warn("some functions couldn't be initialized\n");
+-	}
+-	return 0;
+-}
+-
+-static int ccat_eim_remove(struct platform_device *pdev)
+-{
+-	struct ccat_device *ccatdev = platform_get_drvdata(pdev);
+-
+-	if (ccatdev) {
+-		ccat_functions_remove(ccatdev);
+-		iounmap(ccatdev->bar_0);
+-		release_mem_region(0xf0000000, 0x02000000);
+-	}
+-	return 0;
+-}
+-
+-static const struct of_device_id bhf_eim_ccat_ids[] = {
+-	{.compatible = "bhf,emi-ccat",},
+-	{}
+-};
+-
+-/* prevent auto-loading. */
+-/* MODULE_DEVICE_TABLE(of, bhf_eim_ccat_ids); */
+-
+-static struct platform_driver ccat_eim_driver = {
+-	.driver = {
+-		   .name = KBUILD_MODNAME,
+-		   .of_match_table = bhf_eim_ccat_ids,
+-		   },
+-	.probe = ccat_eim_probe,
+-	.remove = ccat_eim_remove,
+-};
+-
+-module_platform_driver(ccat_eim_driver);
+-#endif /* #ifdef CONFIG_PCI */
+diff -r 8d326521a269 -r 97f5bd7b9f70 devices/ccat/module.h
+--- a/devices/ccat/module.h	Wed Nov 29 07:21:16 2017 +0100
++++ b/devices/ccat/module.h	Wed Nov 29 08:17:53 2017 +0100
+@@ -26,23 +26,16 @@
+ #include <linux/hrtimer.h>
+ #include <linux/kernel.h>
+ #include <linux/pci.h>
++#include <linux/mfd/core.h>
+ #include "../ecdev.h"
+ 
+ #define DRV_EXTRAVERSION "-ec"
+-#define DRV_VERSION      "0.15" DRV_EXTRAVERSION
++#define DRV_VERSION      "0.16" DRV_EXTRAVERSION
+ #define DRV_DESCRIPTION  "Beckhoff CCAT Ethernet/EtherCAT Network Driver"
+ 
+ #undef pr_fmt
+ #define pr_fmt(fmt) KBUILD_MODNAME ": " fmt
+ 
+-extern const struct ccat_driver eth_eim_driver;
+-extern const struct ccat_driver eth_dma_driver;
+-#ifdef CONFIG_GPIO
+-extern const struct ccat_driver gpio_driver;
+-#endif
+-extern const struct ccat_driver sram_driver;
+-extern const struct ccat_driver update_driver;
+-
+ 
+ /**
+  * CCAT function type identifiers (u16)
+@@ -52,10 +45,21 @@
+ 	CCATINFO_ETHERCAT_NODMA = 0x3,
+ 	CCATINFO_GPIO = 0xd,
+ 	CCATINFO_EPCS_PROM = 0xf,
++	CCATINFO_SYSTEMTIME = 0x10,
+ 	CCATINFO_ETHERCAT_MASTER_DMA = 0x14,
+ 	CCATINFO_SRAM = 0x16,
+ };
+ 
++/**
++ * struct ccat_cell
++ *  @type: ccat function type
++ *  @cell: mfd cell for function
++ */
++struct ccat_cell {
++	enum ccat_info_t type;
++	struct mfd_cell cell;
++};
++
+ struct ccat_cdev {
+ 	atomic_t in_use;
+ 	void __iomem *ioaddr;
+@@ -83,18 +87,18 @@
+ /**
+  * struct ccat_device - CCAT device representation
+  * @pdev: pointer to the pci object allocated by the kernel
++ * @dev: pointer to the device object allocated by the kernel
+  * @bar_0: holding information about PCI BAR 0
+  * @bar_2: holding information about PCI BAR 2 (optional)
+- * @functions: list of available (driver loaded) FPGA functions
+  *
+  * One instance of a ccat_device should represent a physical CCAT. Since
+  * a CCAT is implemented as FPGA the available functions can vary.
+  */
+ struct ccat_device {
+ 	void *pdev;
++	void *dev;
+ 	void __iomem *bar_0;
+ 	void __iomem *bar_2;
+-	struct list_head functions;
+ };
+ 
+ struct ccat_info_block {
+@@ -122,10 +126,8 @@
+ };
+ 
+ struct ccat_function {
+-	const struct ccat_driver *drv;
+ 	struct ccat_device *ccat;
+ 	struct ccat_info_block info;
+-	struct list_head list;
+ 	void *private_data;
+ };
+ 
+@@ -139,22 +141,8 @@
+ 	struct file_operations fops;
+ };
+ 
+-extern void ccat_cdev_remove(struct ccat_function *func);
++extern int ccat_cdev_remove(struct platform_device *pdev);
+ extern int ccat_cdev_probe(struct ccat_function *func,
+ 			   struct ccat_class *cdev_class, size_t iosize);
+ 
+-/**
+- * struct ccat_driver - CCAT FPGA function
+- * @probe: add device instance
+- * @remove: remove device instance
+- * @type: type of the FPGA function supported by this driver
+- * @cdev_class: if not NULL that driver supports ccat_class_init()/_exit()
+- */
+-struct ccat_driver {
+-	int (*probe) (struct ccat_function * func);
+-	void (*remove) (struct ccat_function * drv);
+-	enum ccat_info_t type;
+-	struct ccat_class *cdev_class;
+-};
+-
+ #endif /* #ifndef _CCAT_H_ */
+diff -r 8d326521a269 -r 97f5bd7b9f70 devices/ccat/netdev.c
+--- a/devices/ccat/netdev.c	Wed Nov 29 07:21:16 2017 +0100
++++ b/devices/ccat/netdev.c	Wed Nov 29 08:17:53 2017 +0100
+@@ -33,6 +33,11 @@
+ 
+ #include "module.h"
+ 
++MODULE_DESCRIPTION(DRV_DESCRIPTION);
++MODULE_AUTHOR("Patrick Bruenn <p.bruenn@beckhoff.com>");
++MODULE_LICENSE("GPL");
++MODULE_VERSION(DRV_VERSION);
++
+ /**
+  * EtherCAT frame to enable forwarding on EtherCAT Terminals
+  */
+@@ -249,9 +254,11 @@
+ 	u8 mii_connected;
+ };
+ 
++static void ccat_eth_fifo_reset(struct ccat_eth_fifo *const fifo);
+ static void fifo_set_end(struct ccat_eth_fifo *const fifo, size_t size)
+ {
+ 	fifo->end = fifo->mem.start + size - sizeof(struct ccat_eth_frame);
++	ccat_eth_fifo_reset(fifo);
+ }
+ 
+ static void ccat_dma_free(struct ccat_eth_priv *const priv)
+@@ -560,6 +567,7 @@
+ 		ccat_dma_free(priv);
+ 		return status;
+ 	}
++
+ 	return ccat_hw_disable_mac_filter(priv);
+ }
+ 
+@@ -798,7 +806,8 @@
+ static struct rtnl_link_stats64 *ccat_eth_get_stats64(struct net_device *dev, struct rtnl_link_stats64
+ 						      *storage)
+ #else
+-static void ccat_eth_get_stats64(struct net_device *dev, struct rtnl_link_stats64 *storage)
++static void ccat_eth_get_stats64(struct net_device *dev,
++				 struct rtnl_link_stats64 *storage)
+ #endif
+ {
+ 	struct ccat_eth_priv *const priv = netdev_priv(dev);
+@@ -948,9 +957,10 @@
+ 	return 0;
+ }
+ 
+-static int ccat_eth_dma_probe(struct ccat_function *func)
++static int ccat_eth_dma_probe(struct platform_device *pdev)
+ {
+-	struct ccat_eth_priv *priv = ccat_eth_alloc_netdev(func);
++	struct ccat_function *const func = pdev->dev.platform_data;
++	struct ccat_eth_priv *const priv = ccat_eth_alloc_netdev(func);
+ 	int status;
+ 
+ 	if (!priv)
+@@ -965,23 +975,26 @@
+ 	return ccat_eth_init_netdev(priv);
+ }
+ 
+-static void ccat_eth_dma_remove(struct ccat_function *func)
++static int ccat_eth_dma_remove(struct platform_device *pdev)
+ {
++	struct ccat_function *const func = pdev->dev.platform_data;
+ 	struct ccat_eth_priv *const eth = func->private_data;
+ 	eth->unregister(eth->netdev);
+ 	ccat_eth_priv_free(eth);
+ 	free_netdev(eth->netdev);
++	return 0;
+ }
+ 
+-const struct ccat_driver eth_dma_driver = {
+-	.type = CCATINFO_ETHERCAT_MASTER_DMA,
++static struct platform_driver ccat_eth_dma_driver = {
++	.driver = {.name = "ccat_eth_dma"},
+ 	.probe = ccat_eth_dma_probe,
+ 	.remove = ccat_eth_dma_remove,
+ };
+ 
+-static int ccat_eth_eim_probe(struct ccat_function *func)
++static int ccat_eth_eim_probe(struct platform_device *pdev)
+ {
+-	struct ccat_eth_priv *priv = ccat_eth_alloc_netdev(func);
++	struct ccat_function *const func = pdev->dev.platform_data;
++	struct ccat_eth_priv *const priv = ccat_eth_alloc_netdev(func);
+ 	int status;
+ 
+ 	if (!priv)
+@@ -996,16 +1009,37 @@
+ 	return ccat_eth_init_netdev(priv);
+ }
+ 
+-static void ccat_eth_eim_remove(struct ccat_function *func)
++static int ccat_eth_eim_remove(struct platform_device *pdev)
+ {
++	struct ccat_function *const func = pdev->dev.platform_data;
+ 	struct ccat_eth_priv *const eth = func->private_data;
+ 	eth->unregister(eth->netdev);
+ 	ccat_eth_priv_free(eth);
+ 	free_netdev(eth->netdev);
++	return 0;
+ }
+ 
+-const struct ccat_driver eth_eim_driver = {
+-	.type = CCATINFO_ETHERCAT_NODMA,
++static struct platform_driver ccat_eth_eim_driver = {
++	.driver = {.name = "ccat_eth_eim"},
+ 	.probe = ccat_eth_eim_probe,
+ 	.remove = ccat_eth_eim_remove,
+ };
++
++static int __init ccat_eth_init(void)
++{
++	int result;
++	result = platform_driver_register(&ccat_eth_eim_driver);
++	if (result != 0) {
++		return result;
++	}
++	return platform_driver_register(&ccat_eth_dma_driver);
++}
++
++static void __exit ccat_eth_exit(void)
++{
++	platform_driver_unregister(&ccat_eth_eim_driver);
++	platform_driver_unregister(&ccat_eth_dma_driver);
++}
++
++module_init(ccat_eth_init);
++module_exit(ccat_eth_exit);
+diff -r 8d326521a269 -r 97f5bd7b9f70 devices/ccat/sram.c
+--- a/devices/ccat/sram.c	Wed Nov 29 07:21:16 2017 +0100
++++ /dev/null	Thu Jan 01 00:00:00 1970 +0000
+@@ -1,108 +0,0 @@
+-/**
+-    Network Driver for Beckhoff CCAT communication controller
+-    Copyright (C) 2015  Beckhoff Automation GmbH & Co. KG
+-    Author: Patrick Bruenn <p.bruenn@beckhoff.com>
+-
+-    This program is free software; you can redistribute it and/or modify
+-    it under the terms of the GNU General Public License as published by
+-    the Free Software Foundation; either version 2 of the License, or
+-    (at your option) any later version.
+-
+-    This program is distributed in the hope that it will be useful,
+-    but WITHOUT ANY WARRANTY; without even the implied warranty of
+-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+-    GNU General Public License for more details.
+-
+-    You should have received a copy of the GNU General Public License along
+-    with this program; if not, write to the Free Software Foundation, Inc.,
+-    51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+-*/
+-
+-#include "module.h"
+-#include <asm/io.h>
+-#include <linux/fs.h>
+-#include <linux/module.h>
+-#include <linux/uaccess.h>
+-
+-#define CCAT_SRAM_DEVICES_MAX 4
+-
+-static ssize_t __sram_read(struct cdev_buffer *buffer, char __user * buf,
+-			   size_t len, loff_t * off)
+-{
+-	memcpy_fromio(buffer->data, buffer->ccdev->ioaddr + *off, len);
+-	if (copy_to_user(buf, buffer->data, len))
+-		return -EFAULT;
+-
+-	*off += len;
+-	return len;
+-}
+-
+-static ssize_t ccat_sram_read(struct file *const f, char __user * buf,
+-			      size_t len, loff_t * off)
+-{
+-	struct cdev_buffer *buffer = f->private_data;
+-	const size_t iosize = buffer->ccdev->iosize;
+-
+-	if (*off >= iosize) {
+-		return 0;
+-	}
+-
+-	len = min(len, (size_t) (iosize - *off));
+-
+-	return __sram_read(buffer, buf, len, off);
+-}
+-
+-static ssize_t ccat_sram_write(struct file *const f, const char __user * buf,
+-			       size_t len, loff_t * off)
+-{
+-	struct cdev_buffer *const buffer = f->private_data;
+-
+-	if (*off + len > buffer->ccdev->iosize) {
+-		return 0;
+-	}
+-
+-	if (copy_from_user(buffer->data, buf, len)) {
+-		return -EFAULT;
+-	}
+-
+-	memcpy_toio(buffer->ccdev->ioaddr + *off, buffer->data, len);
+-
+-	*off += len;
+-	return len;
+-}
+-
+-static struct ccat_cdev dev_table[CCAT_SRAM_DEVICES_MAX];
+-static struct ccat_class cdev_class = {
+-	.instances = {0},
+-	.count = CCAT_SRAM_DEVICES_MAX,
+-	.devices = dev_table,
+-	.name = "ccat_sram",
+-	.fops = {
+-		 .owner = THIS_MODULE,
+-		 .open = ccat_cdev_open,
+-		 .release = ccat_cdev_release,
+-		 .read = ccat_sram_read,
+-		 .write = ccat_sram_write,
+-		 },
+-};
+-
+-static int ccat_sram_probe(struct ccat_function *func)
+-{
+-	static const u8 NO_SRAM_CONNECTED = 0;
+-	const u8 type = func->info.sram_width & 0x3;
+-	const size_t iosize = (1 << func->info.sram_size);
+-
+-	pr_info("%s: 0x%04x rev: 0x%04x\n", __FUNCTION__, func->info.type,
+-		func->info.rev);
+-	if (type == NO_SRAM_CONNECTED) {
+-		return -ENODEV;
+-	}
+-	return ccat_cdev_probe(func, &cdev_class, iosize);
+-}
+-
+-const struct ccat_driver sram_driver = {
+-	.type = CCATINFO_SRAM,
+-	.probe = ccat_sram_probe,
+-	.remove = ccat_cdev_remove,
+-	.cdev_class = &cdev_class,
+-};
+diff -r 8d326521a269 -r 97f5bd7b9f70 devices/ccat/update.c
+--- a/devices/ccat/update.c	Wed Nov 29 07:21:16 2017 +0100
++++ /dev/null	Thu Jan 01 00:00:00 1970 +0000
+@@ -1,351 +0,0 @@
+-/**
+-    Network Driver for Beckhoff CCAT communication controller
+-    Copyright (C) 2014  Beckhoff Automation GmbH
+-    Author: Patrick Bruenn <p.bruenn@beckhoff.com>
+-
+-    This program is free software; you can redistribute it and/or modify
+-    it under the terms of the GNU General Public License as published by
+-    the Free Software Foundation; either version 2 of the License, or
+-    (at your option) any later version.
+-
+-    This program is distributed in the hope that it will be useful,
+-    but WITHOUT ANY WARRANTY; without even the implied warranty of
+-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+-    GNU General Public License for more details.
+-
+-    You should have received a copy of the GNU General Public License along
+-    with this program; if not, write to the Free Software Foundation, Inc.,
+-    51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+-*/
+-
+-#include <linux/kernel.h>
+-#include <linux/module.h>
+-#include <linux/sched.h>
+-#include <linux/uaccess.h>
+-#include "module.h"
+-
+-#define CCAT_DEVICES_MAX 5
+-#define CCAT_DATA_IN_4 0x038
+-#define CCAT_DATA_IN_N 0x7F0
+-#define CCAT_DATA_OUT_4 0x030
+-#define CCAT_DATA_BLOCK_SIZE (size_t)((CCAT_DATA_IN_N - CCAT_DATA_IN_4)/8)
+-#define CCAT_WRITE_BLOCK_SIZE 128
+-#define CCAT_FLASH_SIZE (size_t)0xE0000
+-
+-/**     FUNCTION_NAME            CMD,  CLOCKS          */
+-#define CCAT_BULK_ERASE          0xE3, 8
+-#define CCAT_GET_PROM_ID         0xD5, 40
+-#define CCAT_READ_FLASH          0xC0, 32
+-#define CCAT_READ_STATUS         0xA0, 16
+-#define CCAT_WRITE_ENABLE        0x60, 8
+-#define CCAT_WRITE_FLASH         0x40, 32
+-
+-/* from http://graphics.stanford.edu/~seander/bithacks.html#ReverseByteWith32Bits */
+-#define SWAP_BITS(B) \
+-	((((B) * 0x0802LU & 0x22110LU) | ((B) * 0x8020LU & 0x88440LU)) * 0x10101LU >> 16)
+-
+-/**
+- * wait_until_busy_reset() - wait until the busy flag was reset
+- * @ioaddr: address of the CCAT Update function in PCI config space
+- */
+-static inline void wait_until_busy_reset(void __iomem * const ioaddr)
+-{
+-	wmb();
+-	while (ioread8(ioaddr + 1)) {
+-		schedule();
+-	}
+-}
+-
+-/**
+- * __ccat_update_cmd() - Helper to issue a FPGA flash command
+- * @ioaddr: address of the CCAT Update function in PCI config space
+- * @cmd: the command identifier
+- * @clocks: the number of clocks associated with the specified command
+- *
+- * no write memory barrier is called and the busy flag is not evaluated
+- */
+-static inline void __ccat_update_cmd(void __iomem * const ioaddr, u8 cmd,
+-				     u16 clocks)
+-{
+-	iowrite8((0xff00 & clocks) >> 8, ioaddr);
+-	iowrite8(0x00ff & clocks, ioaddr + 0x8);
+-	iowrite8(cmd, ioaddr + 0x10);
+-}
+-
+-/**
+- * ccat_update_cmd() - Helper to issue a FPGA flash command
+- * @ioaddr: address of the CCAT Update function in PCI config space
+- * @cmd: the command identifier
+- * @clocks: the number of clocks associated with the specified command
+- *
+- * Triggers a full flash command cycle with write memory barrier and
+- * command activate. This call blocks until the busy flag is reset.
+- */
+-static inline void ccat_update_cmd(void __iomem * const ioaddr, u8 cmd,
+-				   u16 clocks)
+-{
+-	__ccat_update_cmd(ioaddr, cmd, clocks);
+-	wmb();
+-	iowrite8(0xff, ioaddr + 0x7f8);
+-	wait_until_busy_reset(ioaddr);
+-}
+-
+-/**
+- * ccat_update_cmd_addr() - Helper to issue a FPGA flash command with address parameter
+- * @ioaddr: address of the CCAT Update function in PCI config space
+- * @cmd: the command identifier
+- * @clocks: the number of clocks associated with the specified command
+- * @addr: 24 bit address associated with the specified command
+- *
+- * Triggers a full flash command cycle with write memory barrier and
+- * command activate. This call blocks until the busy flag is reset.
+- */
+-static inline void ccat_update_cmd_addr(void __iomem * const ioaddr,
+-					u8 cmd, u16 clocks, u32 addr)
+-{
+-	const u8 addr_0 = SWAP_BITS(addr & 0xff);
+-	const u8 addr_1 = SWAP_BITS((addr & 0xff00) >> 8);
+-	const u8 addr_2 = SWAP_BITS((addr & 0xff0000) >> 16);
+-
+-	__ccat_update_cmd(ioaddr, cmd, clocks);
+-	iowrite8(addr_2, ioaddr + 0x18);
+-	iowrite8(addr_1, ioaddr + 0x20);
+-	iowrite8(addr_0, ioaddr + 0x28);
+-	wmb();
+-	iowrite8(0xff, ioaddr + 0x7f8);
+-	wait_until_busy_reset(ioaddr);
+-}
+-
+-/**
+- * ccat_get_status() - Read CCAT Update status
+- * @ioaddr: address of the CCAT Update function in PCI config space
+- *
+- * Return: the current status of the CCAT Update function
+- */
+-static u8 ccat_get_status(void __iomem * const ioaddr)
+-{
+-	ccat_update_cmd(ioaddr, CCAT_READ_STATUS);
+-	return ioread8(ioaddr + 0x20);
+-}
+-
+-/**
+- * ccat_read_flash_block() - Read a block of CCAT configuration data from flash
+- * @ioaddr: address of the CCAT Update function in PCI config space
+- * @addr: 24 bit address of the block to read
+- * @len: number of bytes to read from this block, len <= CCAT_DATA_BLOCK_SIZE
+- * @buf: output buffer in user space
+- *
+- * Copies one block of configuration data from the CCAT FPGA's flash to
+- * the user space buffer.
+- * Note that the size of the FPGA's firmware is not known exactly so it
+- * is very possible that the overall buffer ends with a lot of 0xff.
+- *
+- * Return: the number of bytes copied
+- */
+-static int ccat_read_flash_block(void __iomem * const ioaddr,
+-				 const u32 addr, const u16 len,
+-				 char __user * const buf)
+-{
+-	u16 i;
+-	const u16 clocks = 8 * len;
+-
+-	ccat_update_cmd_addr(ioaddr, CCAT_READ_FLASH + clocks, addr);
+-	for (i = 0; i < len; i++) {
+-		put_user(ioread8(ioaddr + CCAT_DATA_IN_4 + 8 * i), buf + i);
+-	}
+-	return len;
+-}
+-
+-/**
+- * ccat_read_flash() - Read a chunk of CCAT configuration data from flash
+- * @ioaddr: address of the CCAT Update function in PCI config space
+- * @buf: output buffer in user space
+- * @len: number of bytes to read
+- * @off: offset in the configuration data
+- *
+- * Copies multiple blocks of configuration data from the CCAT FPGA's
+- * flash to the user space buffer.
+- *
+- * Return: the number of bytes copied
+- */
+-static int ccat_read_flash(void __iomem * const ioaddr, char __user * buf,
+-			   u32 len, loff_t * off)
+-{
+-	const loff_t start = *off;
+-
+-	while (len > CCAT_DATA_BLOCK_SIZE) {
+-		*off +=
+-		    ccat_read_flash_block(ioaddr, *off, CCAT_DATA_BLOCK_SIZE,
+-					  buf);
+-		buf += CCAT_DATA_BLOCK_SIZE;
+-		len -= CCAT_DATA_BLOCK_SIZE;
+-	}
+-	*off += ccat_read_flash_block(ioaddr, *off, len, buf);
+-	return *off - start;
+-}
+-
+-/**
+- * ccat_wait_status_cleared() - wait until CCAT status is cleared
+- * @ioaddr: address of the CCAT Update function in PCI config space
+- *
+- * Blocks until bit 7 of the CCAT Update status is reset
+- */
+-static void ccat_wait_status_cleared(void __iomem * const ioaddr)
+-{
+-	u8 status;
+-
+-	do {
+-		status = ccat_get_status(ioaddr);
+-	} while (status & (1 << 7));
+-}
+-
+-/**
+- * ccat_write_flash_block() - Write a block of CCAT configuration data to flash
+- * @ioaddr: address of the CCAT Update function in PCI config space
+- * @addr: 24 bit start address in the CCAT FPGA's flash
+- * @len: number of bytes to write in this block, len <= CCAT_WRITE_BLOCK_SIZE
+- * @buf: input buffer
+- *
+- * Copies one block of configuration data to the CCAT FPGA's flash
+- *
+- * Return: the number of bytes copied
+- */
+-static int ccat_write_flash_block(void __iomem * const ioaddr,
+-				  const u32 addr, const u16 len,
+-				  const char *const buf)
+-{
+-	const u16 clocks = 8 * len;
+-	u16 i;
+-
+-	ccat_update_cmd(ioaddr, CCAT_WRITE_ENABLE);
+-	for (i = 0; i < len; i++) {
+-		iowrite8(buf[i], ioaddr + CCAT_DATA_OUT_4 + 8 * i);
+-	}
+-	ccat_update_cmd_addr(ioaddr, CCAT_WRITE_FLASH + clocks, addr);
+-	ccat_wait_status_cleared(ioaddr);
+-	return len;
+-}
+-
+-/**
+- * ccat_write_flash() - Write a new CCAT configuration to FPGA's flash
+- * @update: a CCAT Update buffer containing the new FPGA configuration
+- */
+-static void ccat_write_flash(const struct cdev_buffer *const buffer)
+-{
+-	const char *buf = buffer->data;
+-	u32 off = 0;
+-	size_t len = buffer->size;
+-
+-	while (len > CCAT_WRITE_BLOCK_SIZE) {
+-		ccat_write_flash_block(buffer->ccdev->ioaddr, off,
+-				       (u16) CCAT_WRITE_BLOCK_SIZE, buf);
+-		off += CCAT_WRITE_BLOCK_SIZE;
+-		buf += CCAT_WRITE_BLOCK_SIZE;
+-		len -= CCAT_WRITE_BLOCK_SIZE;
+-	}
+-	ccat_write_flash_block(buffer->ccdev->ioaddr, off, (u16) len, buf);
+-}
+-
+-static int ccat_update_release(struct inode *const i, struct file *const f)
+-{
+-	const struct cdev_buffer *const buf = f->private_data;
+-	void __iomem *ioaddr = buf->ccdev->ioaddr;
+-
+-	if (buf->size > 0) {
+-		ccat_update_cmd(ioaddr, CCAT_WRITE_ENABLE);
+-		ccat_update_cmd(ioaddr, CCAT_BULK_ERASE);
+-		ccat_wait_status_cleared(ioaddr);
+-		ccat_write_flash(buf);
+-	}
+-	return ccat_cdev_release(i, f);
+-}
+-
+-/**
+- * ccat_update_read() - Read CCAT configuration data from flash
+- * @f: file handle previously initialized with ccat_update_open()
+- * @buf: buffer in user space provided for our data
+- * @len: length of the user space buffer
+- * @off: current offset of our file operation
+- *
+- * Copies data from the CCAT FPGA's configuration flash to user space.
+- * Note that the size of the FPGA's firmware is not known exactly so it
+- * is very possible that the overall buffer ends with a lot of 0xff.
+- *
+- * Return: the number of bytes written, or 0 if EOF reached
+- */
+-static ssize_t ccat_update_read(struct file *const f, char __user * buf,
+-				size_t len, loff_t * off)
+-{
+-	struct cdev_buffer *buffer = f->private_data;
+-	const size_t iosize = buffer->ccdev->iosize;
+-
+-	if (*off >= iosize) {
+-		return 0;
+-	}
+-
+-	len = min(len, (size_t) (iosize - *off));
+-
+-	return ccat_read_flash(buffer->ccdev->ioaddr, buf, len, off);
+-}
+-
+-/**
+- * ccat_update_write() - Write data to the CCAT FPGA's configuration flash
+- * @f: file handle previously initialized with ccat_update_open()
+- * @buf: buffer in user space providing the new configuration data (from *.rbf)
+- * @len: length of the user space buffer
+- * @off: current offset in the configuration data
+- *
+- * Copies data from user space (possibly a *.rbf) to the CCAT FPGA's
+- * configuration flash.
+- *
+- * Return: the number of bytes written, or 0 if flash end is reached
+- */
+-static ssize_t ccat_update_write(struct file *const f, const char __user * buf,
+-				 size_t len, loff_t * off)
+-{
+-	struct cdev_buffer *const buffer = f->private_data;
+-
+-	if (*off + len > buffer->ccdev->iosize) {
+-		return 0;
+-	}
+-
+-	if (copy_from_user(buffer->data + *off, buf, len)) {
+-		return -EFAULT;
+-	}
+-
+-	*off += len;
+-	buffer->size = *off;
+-	return len;
+-}
+-
+-static struct ccat_cdev dev_table[CCAT_DEVICES_MAX];
+-static struct ccat_class cdev_class = {
+-	.count = CCAT_DEVICES_MAX,
+-	.devices = dev_table,
+-	.name = "ccat_update",
+-	.fops = {
+-		 .owner = THIS_MODULE,
+-		 .open = ccat_cdev_open,
+-		 .release = ccat_update_release,
+-		 .read = ccat_update_read,
+-		 .write = ccat_update_write,
+-		 },
+-};
+-
+-static int ccat_update_probe(struct ccat_function *func)
+-{
+-	static const u16 SUPPORTED_REVISION = 0x00;
+-
+-	if (SUPPORTED_REVISION != func->info.rev) {
+-		pr_warn("CCAT Update rev. %d not supported\n", func->info.rev);
+-		return -ENODEV;
+-	}
+-	return ccat_cdev_probe(func, &cdev_class, CCAT_FLASH_SIZE);
+-}
+-
+-const struct ccat_driver update_driver = {
+-	.type = CCATINFO_EPCS_PROM,
+-	.probe = ccat_update_probe,
+-	.remove = ccat_cdev_remove,
+-	.cdev_class = &cdev_class,
+-};
+diff -r 8d326521a269 -r 97f5bd7b9f70 devices/ccat/update.h
+--- a/devices/ccat/update.h	Wed Nov 29 07:21:16 2017 +0100
++++ /dev/null	Thu Jan 01 00:00:00 1970 +0000
+@@ -1,27 +0,0 @@
+-/**
+-    Network Driver for Beckhoff CCAT communication controller
+-    Copyright (C) 2014  Beckhoff Automation GmbH
+-    Author: Patrick Bruenn <p.bruenn@beckhoff.com>
+-
+-    This program is free software; you can redistribute it and/or modify
+-    it under the terms of the GNU General Public License as published by
+-    the Free Software Foundation; either version 2 of the License, or
+-    (at your option) any later version.
+-
+-    This program is distributed in the hope that it will be useful,
+-    but WITHOUT ANY WARRANTY; without even the implied warranty of
+-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+-    GNU General Public License for more details.
+-
+-    You should have received a copy of the GNU General Public License along
+-    with this program; if not, write to the Free Software Foundation, Inc.,
+-    51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+-*/
+-
+-#ifndef _UPDATE_H_
+-#define _UPDATE_H_
+-extern u8 ccat_get_prom_id(void __iomem * const ioaddr);
+-extern struct ccat_update *ccat_update_init(const struct ccat_device *ccatdev,
+-					    void __iomem * addr);
+-extern void ccat_update_remove(struct ccat_update *update);
+-#endif /* #ifndef _UPDATE_H_ */
+diff -r 8d326521a269 -r 97f5bd7b9f70 script/ethercat.conf
+--- a/script/ethercat.conf	Wed Nov 29 07:21:16 2017 +0100
++++ b/script/ethercat.conf	Wed Nov 29 08:17:53 2017 +0100
+@@ -47,11 +47,11 @@
+ # the EtherCAT-capable ones. If a certain (EtherCAT-capable) driver is not
+ # found, a warning will appear.
+ #
+-# Possible values: 8139too, e100, e1000, e1000e, r8169, generic, ccat, igb.
++# Possible values: 8139too, e100, e1000, e1000e, r8169, generic, ccat_netdev, igb.
+ # Separate multiple drivers with spaces.
+ #
+-# Note: The e100, e1000, e1000e, r8169, ccat and igb drivers are not built by
+-# default. Enable them with the --enable-<driver> configure switches.
++# Note: The e100, e1000, e1000e, r8169, ccat_netdev and igb drivers are not
++# built by default. Enable them with the --enable-<driver> configure switches.
+ #
+ # Attention: When using the generic driver, the corresponding Ethernet device
+ # has to be activated (with OS methods, for example 'ip link set ethX up'),
+diff -r 8d326521a269 -r 97f5bd7b9f70 script/ethercatctl.in
+--- a/script/ethercatctl.in	Wed Nov 29 07:21:16 2017 +0100
++++ b/script/ethercatctl.in	Wed Nov 29 08:17:53 2017 +0100
+@@ -108,7 +108,7 @@
+             continue # ec_* module not found
+         fi
+ 
+-        if [ ${MODULE} != "generic" -a ${MODULE} != "ccat" ]; then
++        if [ ${MODULE} != "generic" -a ${MODULE} != "ccat_netdev" ]; then
+             # try to unload standard module
+             if ${LSMOD} | grep "^${MODULE} " > /dev/null; then
+                 if ! ${RMMOD} ${MODULE}; then
+@@ -119,7 +119,7 @@
+         fi
+ 
+         if ! ${MODPROBE} ${MODPROBE_FLAGS} ${ECMODULE}; then
+-            if [ ${MODULE} != "generic" -a ${MODULE} != "ccat" ]; then
++            if [ ${MODULE} != "generic" -a ${MODULE} != "ccat_netdev" ]; then
+                 ${MODPROBE} ${MODPROBE_FLAGS} ${MODULE} # try to restore
+             fi
+             ${RMMOD} ${LOADED_MODULES}
+@@ -150,7 +150,7 @@
+ 
+     # load standard modules again
+     for MODULE in ${DEVICE_MODULES}; do
+-        if [ ${MODULE} == "generic" -o ${MODULE} == "ccat" ]; then
++        if [ ${MODULE} == "generic" -o ${MODULE} == "ccat_netdev" ]; then
+             continue
+         fi
+         ${MODPROBE} ${MODPROBE_FLAGS} ${MODULE}
+diff -r 8d326521a269 -r 97f5bd7b9f70 script/sysconfig/ethercat
+--- a/script/sysconfig/ethercat	Wed Nov 29 07:21:16 2017 +0100
++++ b/script/sysconfig/ethercat	Wed Nov 29 08:17:53 2017 +0100
+@@ -47,11 +47,11 @@
+ # the EtherCAT-capable ones. If a certain (EtherCAT-capable) driver is not
+ # found, a warning will appear.
+ #
+-# Possible values: 8139too, e100, e1000, e1000e, r8169, generic, ccat, igb.
++# Possible values: 8139too, e100, e1000, e1000e, r8169, generic, ccat_netdev, igb.
+ # Separate multiple drivers with spaces.
+ #
+-# Note: The e100, e1000, e1000e, r8169, ccat and igb drivers are not built by
+-# default. Enable them with the --enable-<driver> configure switches.
++# Note: The e100, e1000, e1000e, r8169, ccat_netdev and igb drivers are not
++# built by default. Enable them with the --enable-<driver> configure switches.
+ #
+ # Attention: When using the generic driver, the corresponding Ethernet device
+ # has to be activated (with OS methods, for example 'ip link set ethX up'),

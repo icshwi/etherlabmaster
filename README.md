@@ -243,12 +243,6 @@ Once the `e1001e` native driver is loaded within the Linux kernel, one cannot se
 #### Comments
 * It is still unclear how to build `ethercat.conf` if we have more than one devices now.
 
-
-#### Beckhoff CCAT FPGA Kernel Mode Driver
-
-* https://github.com/jeonghanlee/CCAT-env
-
-
 ## CentOS7 with the NATIVE e1000e driver
 
 ### Notice and Warning
@@ -267,3 +261,118 @@ make dkms_install
 make setup
 ```
 
+
+## Beckhoff CCAT FPGA Kernel Mode Driver [1] 
+
+### Install Beckhoff CCAT Kernel Driver 
+
+Please follow the README file in https://github.com/jeonghanlee/CCAT-env
+Make sure the kernel drivers are loaded 
+```
+lsmod |grep ccat
+ccat_update            16384  0
+ccat_systemtime        16384  0
+ccat_sram              16384  0
+ccat_gpio              16384  0
+ccat_netdev            20480  0
+ccat                   16384  2 ccat_sram,ccat_update
+
+```
+
+### Etherlabmaster code 
+
+The etherlab master needs the following patch file in [2]. This repository has the copied version of this file with the hash id `bc9e28f` ( 2019-11-05 ) in `patch/CCAT`. For further information, please look at the header of the patch file. 
+
+### Commands
+
+* Set the `ETHERCAT_MASTER0`
+
+```
+echo "ETHERCAT_MASTER0=enp0s25" > ethercatmaster.local
+```
+
+* Make sure that there is no existent etherlabmaster EtherCAT kernel
+
+
+
+```
+make init
+echo "WITH_DEV_GENERIC = NO"  > configure/CONFIG_OPTIONS.local
+echo "WITH_DEV_CCAT = YES" >> configure/CONFIG_OPTIONS.local
+make ccat_patch
+make build
+make install
+make dkms_add
+make dkms_build
+make dkms_install
+make setup
+```
+
+### Few interesting command results
+
+```
+$ echo "WITH_DEV_GENERIC = NO"  > configure/CONFIG_OPTIONS.local
+$ echo "WITH_DEV_CCAT = YES" >> configure/CONFIG_OPTIONS.local
+$ make showopts
+
+>>>>  Configuration Options Variables   <<<<
+
+E3_EHTERLAB_CONF_OPTIONS is defined as the follows:
+
+--disable-generic --disable-8139too --disable-e100 --disable-e1000 --disable-e1000e --disable-igb --disable-r8169 --enable-ccat_netdev --enable-static=yes --enable-shared=yes --enable-eoe=no --enable-cycles=yes --enable-hrtimer=no --enable-regalias=no --enable-tool=yes --enable-userlib=yes --enable-sii-assign=yes --enable-rt-syslog=yes
+
+WITH_PATCHSET = NO
+
+WITH_DEV_8139TOO = NO
+WITH_DEV_CCAT = YES
+WITH_DEV_E100 = NO
+WITH_DEV_E1000 = NO
+WITH_DEV_E1000E = NO
+WITH_DEV_GENERIC = NO
+WITH_DEV_IGB = NO
+WITH_DEV_R8169 = NO
+
+ENABLE_CYCLES = YES
+ENABLE_EOE = NO
+ENABLE_HRTIMER = NO
+ENABLE_REGALIAS = NO
+ENABLE_RT_SYSLOG = YES
+ENABLE_SII_ASSIGN = YES
+ENABLE_STATIC = YES
+ENABLE_TOOL = YES
+ENABLE_USERLIB = YES
+
+make ccat_patch
+
+Patching etherlabmaster-code with the CCAT patch file : /home/jhlee/ics_gitsrc/etherlabmaster/patch/CCAT/0001-convert-ccat-to-mfd.patch
+patching file configure.ac
+Hunk #1 succeeded at 539 (offset -1 lines).
+Hunk #2 succeeded at 548 (offset -1 lines).
+patching file devices/ccat/Kbuild.in
+patching file devices/ccat/Makefile.am
+patching file devices/ccat/gpio.c
+patching file devices/ccat/module.c
+patching file devices/ccat/module.h
+patching file devices/ccat/netdev.c
+patching file devices/ccat/sram.c
+patching file devices/ccat/update.c
+patching file devices/ccat/update.h
+patching file script/ethercat.conf
+patching file script/ethercatctl.in
+patching file script/sysconfig/ethercat
+
+
+lsmod |grep ccat
+ccat_update            16384  0
+ccat_systemtime        16384  0
+ccat_sram              16384  0
+ccat_gpio              16384  0
+ccat_netdev            20480  0
+ccat                   16384  2 ccat_sram,ccat_update
+
+```
+
+
+## References
+[1] https://github.com/Beckhoff/CCAT
+[2] https://github.com/Beckhoff/CCAT/blob/master/etherlab-patches/0001-convert-ccat-to-mfd.patch
