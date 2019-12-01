@@ -222,7 +222,7 @@ It uses the default variable which one has to set as `ETHERCAT_MASTER0` at the b
 $ make show_netdrv
 /sys/class/net/enp0s25/device/uevent:DRIVER=e1000e
 ```
-Once the `e1001e` native driver is loaded within the Linux kernel, one cannot see the netdrv anymore, because the device which one allocate is not the network device anymore.
+Once the `e1000e` native driver is loaded within the Linux kernel, one cannot see the netdrv anymore, because the device which one allocate is not the network device anymore.
 
 ## Troubleshooting
 
@@ -248,7 +248,7 @@ Once the `e1001e` native driver is loaded within the Linux kernel, one cannot se
 ## CentOS7 with the NATIVE e1000e driver
 
 ### Notice and Warning
-* This is **NOT** for the genric driver, **BUT** for the **NATIVE** e1000e driver. If one would like to use the genric one, it is not necessary to follow this step. If one doesn't know what difference is, one should go the generic one. 
+* This is **NOT** for the generic driver, **BUT** for the **NATIVE** e1000e driver. If one would like to use the generic one, it is not necessary to follow this step. If one doesn't know what difference is, one should go the generic one. 
 
 Due to `rh_kabi.h`, we cannot compile e1000e native driver the default kernel 3.10. Thus, it needs the special patch file for this purpose. Some functionalities are limited and especially related with kernel log and a network device usage statistics. Both of them are no critical things for the ethercat application. The additional makefile rule command `make centos7_patch` is necessary before `make dkms_add`. The full commands are
 
@@ -283,11 +283,11 @@ ccat                   16384  2 ccat_sram,ccat_update
 
 ### Etherlabmaster code 
 
-The etherlab master needs the following patch file in [2]. This repository has the copied version of this file with the hash id `bc9e28f` ( 2019-11-05 ) in `patch/CCAT`. For further information, please look at the header of the patch file. 
-
+The etherlab master needs the following patch file in [2]. This repository has the copied version of this file with the hash id `bc9e28f` ( 2019-11-05 ) in `patch/CCAT`. For further information, please look at the header of the patch file. In addition, `ccat_netdev.ko` cannot be removed if it is loaded. With that kernel module, we cannot insert `ec_ccat_netdev.ko`. Thus, we need to have another patch file [3]. Please remember that one should the Beckhoff CCAT first [1,4], then follow the commands. 
+ 
 ### Commands
 
-* Set the `ETHERCAT_MASTER0`
+* Set the `ETHERCAT_MASTER0` (This should be verified!!!)
 
 ```
 echo "ETHERCAT_MASTER0=enp0s25" > ethercatmaster.local
@@ -385,3 +385,7 @@ ccat                   16384  2 ccat_sram,ccat_update
 [1] https://github.com/Beckhoff/CCAT
 
 [2] https://github.com/Beckhoff/CCAT/blob/master/etherlab-patches/0001-convert-ccat-to-mfd.patch
+
+[3] https://github.com/icshwi/etherlabmaster/blob/devel/ccat_netdev/patch/CCAT/0002-remove-beckhoff-ccat_netdev-if-exists.patch
+
+[4] https://github.com/jeonghanlee/CCAT-env
