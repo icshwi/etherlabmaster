@@ -125,9 +125,11 @@ In order to remove them and clean the configuration
 ```sh
 etherlabmaster (master)$ sudo systemctl stop ethercat
 etherlabmaster (master)$ sudo systemctl disable ethercat
+etherlabmaster (master)$ make setup_clean
+etherlabmaster (master)$ make conf
 etherlabmaster (master)$ make dkms_uninstall
 etherlabmaster (master)$ make dkms_remove
-etherlabmaster (master)$ make setup_clean
+
 ```
 
 ## Steps
