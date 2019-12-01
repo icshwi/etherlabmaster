@@ -362,19 +362,26 @@ patching file devices/ccat/update.h
 patching file script/ethercat.conf
 patching file script/ethercatctl.in
 patching file script/sysconfig/ethercat
+```
 
 
-lsmod |grep ccat
+```
+# systemctl restart ethercat
+
+# lsmod  |grep ccat
+ec_ccat_netdev         24576  0
+ec_master             331776  1 ec_ccat_netdev
 ccat_update            16384  0
 ccat_systemtime        16384  0
 ccat_sram              16384  0
 ccat_gpio              16384  0
-ccat_netdev            20480  0
 ccat                   16384  2 ccat_sram,ccat_update
+
 
 ```
 
 
 ## References
 [1] https://github.com/Beckhoff/CCAT
+
 [2] https://github.com/Beckhoff/CCAT/blob/master/etherlab-patches/0001-convert-ccat-to-mfd.patch
