@@ -1,0 +1,17 @@
+
+.PHONY: patch patchrevert
+
+
+## Apply Patch Files 
+ccat_patch:
+	$(QUIET) $(call patchCCAT)
+
+## Revert Patch Files 
+ccat_patchrevert:
+	$(QUIET) $(call patchCCAT_revert)
+
+
+
+VARS_EXCLUDES+=ccat_patchrevert
+VARS_EXCLUDES+=ccat_patch
+

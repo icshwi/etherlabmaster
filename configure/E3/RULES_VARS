@@ -63,3 +63,15 @@ vers:
 	$(QUIET)echo "EtherlabMaster_SRCTAG:=$(EPICS_MODULE_TAG)"
 	$(QUIET)echo "EtherlabMaster_VERSION:=$(E3_MODULE_VERSION)"
 	$(QUIET)echo "ETHERCAT_MASTER0:=$(ETHERCAT_MASTER0)"
+
+
+# https://www.cmcrossroads.com/article/printing-value-makefile-variable
+PRINT.%:
+	$(QUIET)echo $* = $($*)
+	$(QUIET)echo $*\'s origin is $(origin $*)
+
+print-%:
+	$(QUIET)echo $* = $($*)
+	$(QUIET)echo $*\'s origin is $(origin $*)
+
+FORCE:

@@ -23,7 +23,7 @@ endef
 
 define patch_revert_site
 for i in $(wildcard $(TOP)/patch/Site/*p0.patch); do\
-	printf "\nRevering path %s with the file : %s\n" "$(E3_MODULE_SRC_PATH)" "$$i";\
+	printf "\nReverting Site patch files in %s  : %s\n" "$(E3_MODULE_SRC_PATH)" "$$i";\
 	patch -R -d $(E3_MODULE_SRC_PATH) --ignore-whitespace -p0 < $$i;\
 done
 endef
@@ -39,7 +39,7 @@ endef
 
 define patchset_revert
 for i in $(wildcard $(TOP)/patch/patchset/*p0.patch); do\
-	printf "\nRevering path %s with the Patchset file : %s\n" "$(E3_MODULE_SRC_PATH)" "$$i";\
+	printf "\nReverting Patchset patch files in %s : %s\n" "$(E3_MODULE_SRC_PATH)" "$$i";\
 	patch -R -d $(E3_MODULE_SRC_PATH) --ignore-whitespace -p0 < $$i;\
 done
 endef
@@ -47,7 +47,7 @@ endef
 
 define patchcentos7
 for i in $(wildcard $(TOP)/patch/CentOS7/*p0.patch); do\
-	printf "\nPatching %s with the Patchset file : %s\n" "$(E3_MODULE_SRC_PATH)" "$$i";\
+	printf "\nPatching %s with the CentOS7 file : %s\n" "$(E3_MODULE_SRC_PATH)" "$$i";\
 	patch -d $(E3_MODULE_SRC_PATH) --ignore-whitespace -p0 < $$i;\
 done
 endef
@@ -55,10 +55,28 @@ endef
 
 define patchcentos7_revert
 for i in $(wildcard $(TOP)/patch/CentOS7/*p0.patch); do\
-	printf "\nRevering path %s with the Patchset file : %s\n" "$(E3_MODULE_SRC_PATH)" "$$i";\
+	printf "\nReverting CentOS7 patch files in %s : %s\n" "$(E3_MODULE_SRC_PATH)" "$$i";\
 	patch -R -d $(E3_MODULE_SRC_PATH) --ignore-whitespace -p0 < $$i;\
 done
 endef
+
+
+## p1 patch
+define patchCCAT
+for i in $(wildcard $(TOP)/patch/CCAT/*patch); do\
+	printf "\nPatching %s with the CCAT patch file : %s\n" "$(E3_MODULE_SRC_PATH)" "$$i";\
+	patch -d $(E3_MODULE_SRC_PATH) --ignore-whitespace -p1 < $$i;\
+done
+endef
+
+
+define patchCCAT_revert
+for i in $(wildcard $(TOP)/patch/CCAT/*patch); do\
+	printf "\nReverting CCAT patch files in %s : %s\n" "$(E3_MODULE_SRC_PATH)" "$$i";\
+	patch -R -d $(E3_MODULE_SRC_PATH) --ignore-whitespace -p1 < $$i;\
+done
+endef
+
 
 
 
@@ -82,3 +100,5 @@ VARS_EXCLUDES+=QUIET
 VARS_EXCLUDES+=SHELL
 VARS_EXCLUDES+=patchcentos7
 VARS_EXCLUDES+=patchcentos7_revert
+VARS_EXCLUDES+=patchCCAT
+VARS_EXCLUDES+=patchCCAT_revert

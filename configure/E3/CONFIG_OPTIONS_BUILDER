@@ -1,61 +1,66 @@
-
+## Network Devices
+## Tested
 ifeq ($(WITH_DEV_GENERIC),YES)
 E3_ETHERLAB_CONF_OPTIONS+=--enable-generic
 else
 E3_ETHERLAB_CONF_OPTIONS+=--disable-generic
 endif
 
+## NOT Tested
 ifeq ($(WITH_DEV_8139TOO),YES)
 E3_ETHERLAB_CONF_OPTIONS+=--enable-8139too
 else
 E3_ETHERLAB_CONF_OPTIONS+=--disable-8139too
 endif
 
-
-
+## NOT Tested
 ifeq ($(WITH_DEV_E100),YES)
 E3_ETHERLAB_CONF_OPTIONS+=--enable-e100
 else
 E3_ETHERLAB_CONF_OPTIONS+=--disable-e100
 endif
 
-
+## NOT Tested
 ifeq ($(WITH_DEV_E1000),YES)
 E3_ETHERLAB_CONF_OPTIONS+=--enable-e1000
 else
 E3_ETHERLAB_CONF_OPTIONS+=--disable-e1000
 endif
 
-
+## Tested
 ifeq ($(WITH_DEV_E1000E),YES)
 E3_ETHERLAB_CONF_OPTIONS+=--enable-e1000e
 else
 E3_ETHERLAB_CONF_OPTIONS+=--disable-e1000e
 endif
 
-
+## NOT Tested
 ifeq ($(WITH_DEV_IGB),YES)
 E3_ETHERLAB_CONF_OPTIONS+=--enable-igb
 else
 E3_ETHERLAB_CONF_OPTIONS+=--disable-igb
 endif
 
-
+## NOT Tested
 ifeq ($(WITH_DEV_R8169),YES)
 E3_ETHERLAB_CONF_OPTIONS+=--enable-r8169
 else
 E3_ETHERLAB_CONF_OPTIONS+=--disable-r8169
 endif
 
-
+## Tested
+## Native CCAT needs the convert-ccat-to-mfd.patch
+## So, the option should be used as -ccat_netdev instead of -ccat
+## Thursday, November 28 23:42:05 CET 2019, jhlee
+##
 ifeq ($(WITH_DEV_CCAT),YES)
-E3_ETHERLAB_CONF_OPTIONS+=--enable-ccat
+E3_ETHERLAB_CONF_OPTIONS+=--enable-ccat_netdev
 else
 E3_ETHERLAB_CONF_OPTIONS+=--disable-ccat
 endif
 
-
-
+## Other Options
+##
 ifeq ($(ENABLE_STATIC),YES)
 E3_ETHERLAB_CONF_OPTIONS+=--enable-static=yes
 else

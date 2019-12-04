@@ -6,5 +6,6 @@ include $(TOP)/configure/E3/RULES_DKMS_BUILDER
 include $(TOP)/configure/E3/RULES_ETHERLAB
 include $(TOP)/configure/E3/RULES_PATCHSET
 include $(TOP)/configure/E3/RULES_PATCHCENTOS7
+include $(TOP)/configure/E3/RULES_PATCHCCAT
 
 include $(TOP)/configure/E3/RULES_VARS

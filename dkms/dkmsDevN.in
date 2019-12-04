@@ -1,3 +1,3 @@
-BUILT_MODULE_NAME[__NUMBER__]="devices/__NAME__/ec___NAME__"
+BUILT_MODULE_NAME[__NUMBER__]="devices/__PATHNAME__/ec___NAME__"
 DEST_MODULE_NAME[__NUMBER__]="ec___NAME__"
 DEST_MODULE_LOCATION[__NUMBER__]="/updates/dkms"
