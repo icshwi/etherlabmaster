@@ -111,11 +111,6 @@ dkms_uninstall:
 
 ## Configuration for EtherCAT Master (systemd, ethercat.conf, and others)
 setup:
-ifeq ($(WITH_DEV_CCAT),YES)
-	$(QUIET) echo ">>> If /etc/module-load.d/ccat_netdev.conf exists,"
-	$(QUIET) echo "    we are removing it, because it cannot be coexist with ec_ccat_netdev.\n"
-	$(QUIET) $(SUDO_CMD) find /etc/modules-load.d/ -maxdepth 1 -name "ccat_netdev*" -exec rm {} +
-endif
 	$(QUIET) bash $(TOP)/scripts/etherlab_setup.bash -t $(E3_ETHERLAB_INSTALL_LOCATION)
 
 ## Clean up the configuration for EtherCAT Master (systemd, ethercat.conf, and others)
