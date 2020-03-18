@@ -327,6 +327,9 @@ case "$dist" in
     *Ubuntu*)
 	SD_UNIT_PATH=${SD_UNIT_PATH_DEBIAN}
 	;;
+    *Raspbian*)
+	SD_UNIT_PATH=${SD_UNIT_PATH_DEBIAN}
+	;;
     *CentOS*)
 	SD_UNIT_PATH=${SD_UNIT_PATH_CENTOS}
 	;;
