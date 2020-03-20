@@ -10,7 +10,7 @@ Configuration Environment for EtherLab IgH EtherCAT Master at https://sourceforg
 ## Notice and Warning
 * This is **NOT** a web application, **NOT** an Apps for phones, **NOT** a cloud application.
 * If the system has already the etherlab master kernel configuration, please don't use this before cleaning up all existent configuration.
-* If one would like to use it with https://github.com/epics-modules/ecmc, one should use it on **Intel** architecture. The `ecmc` needs `--enable-cycles = YES` in order to use CPU timestamp counter.
+* If one would like to use it with https://github.com/epics-modules/ecmc, one should use it on **Intel** architecture. The `ecmc` needs `--enable-cycles = YES` in order to use CPU timestamp counter. However, test have been initiated on ARM, see section below on Raspberry pi for more info.
 
 ## Role
 In order to download, install, setup all relevant components (system library, kernel module, ethercat configuration, and systemd service), one should do many steps manually. This repository was designed for the easy-to-reproducible environment for EtherLab EtherCAT Master. With the following steps, one can run the EtherCAT Master on one dedicated Ethernet port within CentOS, RedHat, Ubuntu, and Debian OSs.
@@ -379,8 +379,11 @@ ccat                   16384  2 ccat_sram,ccat_update
 
 ```
 ## Installing on Raspbian
-Tests have been performed on a Raspberry-pi 4b running Raspbian version 4.19.97-v7l+ (ARM arch).
-RT-patches have not been tested yet.
+Tests have been performed on:
+- Raspberry-pi 4b running Raspbian version 4.19.97-v7l+ (ARM arch).
+- generic driver
+
+RT-patches have not been tested yet. WIP..
 
 Prepare:
 ```
@@ -395,7 +398,6 @@ Note: TSC is not available for ARM so the option "ENABLE_CYCLES=NO" is needed.
 ```
 # !!!!!!IMPORTANT TSC not availbe in ARM (Set ENABLE_CYCLES=NO)!!!!!!! 
 $ echo "ENABLE_CYCLES = NO" > configure/CONFIG_OPTIONS.local
-
 ```
 Install etherlab master:
 ```
