@@ -378,8 +378,27 @@ ccat                   16384  2 ccat_sram,ccat_update
 
 
 ```
+## Installing on Raspbian
+Tests have been perfromed on a Raspberry-pi 4b
+Note TSC is not available for ARM so the option "ENABLE_CYCLES=No" is needed.
+```
+$ git clone https://github.com/icshwi/etherlabmaster
+$ cd etherlabmaster
+$ make init
+# !!!!!!IMPORTANT TSC not availbe in ARM (Set ENABLE_CYCLES=NO)!!!!!!! 
+$ echo "ENABLE_CYCLES = NO" > configure/CONFIG_OPTIONS.local
+$ make build
+$ make install
+# probably not needed: $ make modules
+# Ensure check so files are in /opt/etherlab/ maybe "make modules" is needed?! seems sometimes "make install" fails??
+$ echo "ETHERCAT_MASTER0=eth0" > ethercatmaster.local
+$ make dkms_add
+$ make dkms_build
+$ make dkms_install
+$ make setup
 
-
+$ sudo systemctl start ethercat
+```
 ## References
 [1] https://github.com/Beckhoff/CCAT
 
