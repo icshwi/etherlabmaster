@@ -379,8 +379,25 @@ ccat                   16384  2 ccat_sram,ccat_update
 
 ```
 ## Installing on Raspbian
-Tests have been perfromed on a Raspberry-pi 4b
-Note TSC is not available for ARM so the option "ENABLE_CYCLES=No" is needed.
+Tests have been performed on a Raspberry-pi 4b running Raspbian version 4.19.97-v7l+ (ARM arch).
+RT-patches have not been tested yet.
+
+Prepare:
+```
+# Tools
+$ sudo apt install -y  build-essential libtool automake tree dkms
+# Hg
+$ sudo apt-get install mercurial
+# Kernel headers are needed:
+$ sudo apt install raspberrypi-kernel-headers
+```
+Note: TSC is not available for ARM so the option "ENABLE_CYCLES=NO" is needed.
+```
+# !!!!!!IMPORTANT TSC not availbe in ARM (Set ENABLE_CYCLES=NO)!!!!!!! 
+$ echo "ENABLE_CYCLES = NO" > configure/CONFIG_OPTIONS.local
+
+```
+Install etherlab master:
 ```
 $ git clone https://github.com/icshwi/etherlabmaster
 $ cd etherlabmaster
@@ -389,14 +406,12 @@ $ make init
 $ echo "ENABLE_CYCLES = NO" > configure/CONFIG_OPTIONS.local
 $ make build
 $ make install
-# probably not needed: $ make modules
-# Ensure check so files are in /opt/etherlab/ maybe "make modules" is needed?! seems sometimes "make install" fails??
 $ echo "ETHERCAT_MASTER0=eth0" > ethercatmaster.local
 $ make dkms_add
 $ make dkms_build
 $ make dkms_install
 $ make setup
-
+# Reboot or start manually
 $ sudo systemctl start ethercat
 ```
 ## References
